@@ -1,0 +1,15 @@
+{
+  "name": "운동 타이머",
+  "short_name": "운동타이머",
+  "description": "브릿지 등 반복 운동을 위한 음성 안내 타이머",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "lang": "ko-KR",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

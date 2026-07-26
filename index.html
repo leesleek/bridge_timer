@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>운동 타이머</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+    <header class="topbar">
+      <h1 id="appTitle">브릿지 타이머</h1>
+      <button id="settingsBtn" class="icon-btn" aria-label="설정">⚙️</button>
+    </header>
+
+    <section class="stage" aria-live="polite">
+      <div class="phase" id="phaseLabel">준비</div>
+      <div class="ring" role="timer" aria-label="남은 시간">
+        <svg viewBox="0 0 200 200" class="ring-svg" aria-hidden="true">
+          <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
+          <circle class="ring-fg" cx="100" cy="100" r="90" id="ringFg"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="time" id="timeLabel">00</div>
+          <div class="sub" id="subLabel">시작을 눌러 주세요</div>
+        </div>
+      </div>
+
+      <div class="counters">
+        <div class="counter">
+          <div class="counter-label">세트</div>
+          <div class="counter-value"><span id="setNow">0</span> / <span id="setTotal">3</span></div>
+        </div>
+        <div class="counter">
+          <div class="counter-label">회차</div>
+          <div class="counter-value"><span id="repNow">0</span> / <span id="repTotal">10</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <button id="startBtn" class="primary">시작</button>
+      <button id="pauseBtn" class="secondary" disabled>일시정지</button>
+      <button id="resetBtn" class="ghost">리셋</button>
+    </section>
+
+    <p class="hint">
+      화면이 꺼지지 않도록 도와드립니다. 홈 화면에 추가하시면 앱처럼 사용할 수 있어요.
+    </p>
+  </main>
+
+  <!-- 설정 모달 -->
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="settings">
+      <h2>설정</h2>
+
+      <fieldset class="group">
+        <legend>운동</legend>
+        <label class="row">
+          <span>운동 종류</span>
+          <div class="row-value">
+            <select id="exercisePreset">
+              <option value="브릿지">브릿지</option>
+              <option value="플랭크">플랭크</option>
+              <option value="스쿼트">스쿼트</option>
+              <option value="런지">런지</option>
+              <option value="윗몸일으키기">윗몸일으키기</option>
+              <option value="푸시업">푸시업</option>
+              <option value="사이드플랭크">사이드플랭크</option>
+              <option value="__custom__">직접 입력…</option>
+            </select>
+          </div>
+        </label>
+        <label class="row" id="exerciseCustomRow" hidden>
+          <span>운동 이름 직접 입력</span>
+          <div class="row-value">
+            <input type="text" id="exerciseName" maxlength="20" placeholder="예: 벽 스쿼트" />
+          </div>
+        </label>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>세트 구성</legend>
+
+        <label class="row">
+          <span>세트 수</span>
+          <div class="row-value">
+            <input type="range" id="setsRange" min="1" max="10" step="1" />
+            <input type="number" id="sets" min="1" max="20" step="1" inputmode="numeric" />
+            <span class="unit">세트</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>세트당 회수</span>
+          <div class="row-value">
+            <input type="range" id="repsRange" min="1" max="30" step="1" />
+            <input type="number" id="reps" min="1" max="99" step="1" inputmode="numeric" />
+            <span class="unit">회</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>회당 유지 시간</span>
+          <div class="row-value">
+            <input type="range" id="bridgeSecRange" min="5" max="120" step="1" />
+            <input type="number" id="bridgeSec" min="1" max="600" step="1" inputmode="numeric" />
+            <span class="unit">초</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>회차 사이 휴식</span>
+          <div class="row-value">
+            <input type="range" id="restSecRange" min="0" max="60" step="1" />
+            <input type="number" id="restSec" min="0" max="600" step="1" inputmode="numeric" />
+            <span class="unit">초</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>세트 사이 휴식</span>
+          <div class="row-value">
+            <input type="range" id="breakSecRange" min="0" max="120" step="1" />
+            <input type="number" id="breakSec" min="0" max="600" step="1" inputmode="numeric" />
+            <span class="unit">초</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>준비 카운트다운</span>
+          <div class="row-value">
+            <input type="range" id="prepareSecRange" min="0" max="15" step="1" />
+            <input type="number" id="prepareSec" min="0" max="60" step="1" inputmode="numeric" />
+            <span class="unit">초</span>
+          </div>
+        </label>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>음성</legend>
+
+        <label class="row">
+          <span>음성 선택</span>
+          <div class="row-value">
+            <select id="voiceSelect"></select>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>말하기 속도</span>
+          <div class="row-value">
+            <input type="range" id="voiceRateRange" min="0.5" max="1.8" step="0.05" />
+            <input type="number" id="voiceRate" min="0.5" max="2" step="0.05" inputmode="decimal" />
+            <span class="unit">배</span>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>음성 높이</span>
+          <div class="row-value">
+            <input type="range" id="voicePitchRange" min="0.5" max="1.8" step="0.05" />
+            <input type="number" id="voicePitch" min="0.5" max="2" step="0.05" inputmode="decimal" />
+          </div>
+        </label>
+
+        <label class="row inline">
+          <span>격려 멘트 사용</span>
+          <div class="row-value"><input type="checkbox" id="encourage" /></div>
+        </label>
+
+        <label class="row inline">
+          <span>비프음 사용</span>
+          <div class="row-value"><input type="checkbox" id="beeps" /></div>
+        </label>
+
+        <div class="row">
+          <button type="button" id="voiceTest" class="secondary">음성 테스트</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>멘트 편집 (한 줄에 하나씩)</legend>
+
+        <label class="row">
+          <span>브릿지 중 격려</span>
+          <div class="row-value">
+            <textarea id="msgMid" rows="4" placeholder="한 줄에 하나씩 입력"></textarea>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>절반 지점 격려</span>
+          <div class="row-value">
+            <textarea id="msgHalf" rows="3"></textarea>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>세트 종료 시</span>
+          <div class="row-value">
+            <textarea id="msgSetEnd" rows="3"></textarea>
+          </div>
+        </label>
+
+        <label class="row">
+          <span>운동 시작 안내</span>
+          <div class="row-value">
+            <input type="text" id="msgStart" placeholder="예: {sets}세트 {reps}회 {exercise}를 시작합니다. 준비하세요." />
+          </div>
+        </label>
+
+        <label class="row">
+          <span>회 시작 안내</span>
+          <div class="row-value">
+            <input type="text" id="msgRepStart" placeholder="예: {set}세트 {rep}회, 시작." />
+          </div>
+        </label>
+
+        <label class="row">
+          <span>회 종료 안내</span>
+          <div class="row-value">
+            <input type="text" id="msgRepEnd" placeholder="예: {rep}회 완료. 잠시 쉬세요." />
+          </div>
+        </label>
+
+        <label class="row">
+          <span>운동 완료 안내</span>
+          <div class="row-value">
+            <input type="text" id="msgDone" placeholder="예: 모든 세트를 마쳤습니다. 수고하셨어요." />
+          </div>
+        </label>
+
+        <p class="hint left">치환 변수: <code>{exercise}</code> <code>{set}</code> <code>{sets}</code> <code>{rep}</code> <code>{reps}</code> <code>{sec}</code></p>
+      </fieldset>
+
+      <div class="row footer-row">
+        <button type="button" id="resetDefaults" class="ghost">기본값 복원</button>
+        <button value="close" class="primary">닫기</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
