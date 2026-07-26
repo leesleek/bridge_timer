@@ -34,6 +34,7 @@
     voiceSelect: $("voiceSelect"),
     voiceRate: $("voiceRate"), voiceRateRange: $("voiceRateRange"),
     voicePitch: $("voicePitch"), voicePitchRange: $("voicePitchRange"),
+    onlyKorean: $("onlyKorean"),
     encourage: $("encourage"),
     beeps: $("beeps"),
     voiceTest: $("voiceTest"),
@@ -60,36 +61,40 @@
     breakSec: 12,
     prepareSec: 5,
     voiceURI: "",
-    voiceRate: 1.0,
+    voiceRate: 0.95,
     voicePitch: 1.0,
+    onlyKorean: true,
     encourage: true,
     beeps: true,
     messages: {
       mid: [
-        "잘하고 있어요, 조금만 더 버텨요.",
-        "엉덩이 꽉 조여요.",
-        "호흡 유지하세요.",
-        "코어에 힘 주세요.",
-        "허리 무리 없이, 엉덩이로 밀어요.",
+        "좋아요, 그대로 유지.",
+        "숨 쉬면서, 천천히.",
+        "엉덩이 힘 빠지지 않게.",
+        "허리 말고, 엉덩이로 밀어요.",
+        "조금만 더, 조금만 더.",
+        "잘하고 있어요.",
       ],
       half: [
-        "절반 지났어요. 계속 갑시다.",
-        "반 왔어요. 좋아요.",
+        "반 왔어요, 좋아요.",
+        "절반 넘겼네요, 잘하고 있어요.",
+        "이제 반 남았어요, 힘내요.",
       ],
       setEnd: [
-        "한 세트 완료. 훌륭해요.",
-        "잘했어요. 잠시 쉬어요.",
-        "좋습니다. 다음 세트도 힘내요.",
+        "잘하셨어요, 잠깐 쉬어요.",
+        "오, 좋아요. 한 세트 끝.",
+        "수고했어요, 물 한 모금 마셔도 좋아요.",
+        "이야, 잘하고 있네요.",
       ],
-      start: "{sets}세트 {reps}회 {exercise}를 시작합니다. 준비하세요.",
-      repStart: "{set}세트 {rep}회, 시작.",
-      repEnd: "{rep}회 완료. 잠시 쉬세요.",
-      setBreak: "{set}세트 완료. {sec}초 후 다음 세트 시작.",
-      done: "모든 세트를 마쳤습니다. 정말 수고하셨어요.",
+      start: "자, {exercise} {sets}세트 시작할게요. 한 세트에 {reps}회씩 갑시다. 자세 잡으세요.",
+      repStart: "{rep}번째, 갈게요.",
+      repEnd: "좋아요, 잠깐 쉬어요.",
+      setBreak: "{set}세트 끝. 잠깐 숨 좀 돌리고 다음 세트 가요.",
+      done: "다 했어요. 오늘도 진짜 잘하셨어요.",
     },
   };
 
-  const STORAGE_KEY = "workout-timer.settings.v2";
+  const STORAGE_KEY = "workout-timer.settings.v3";
   let settings = loadSettings();
 
   const CIRC = 2 * Math.PI * 90;
@@ -100,31 +105,60 @@
   let voices = [];
   let selectedVoice = null;
 
+  // Voices whose name contains "Online" / "Natural" are Azure cloud voices
+  // exposed by Edge; Chrome lists them but cannot play them. Mark them so the
+  // user knows and doesn't accidentally pick one that stays silent.
+  function isLikelyOnline(v) {
+    return /online|natural/i.test(v.name || "");
+  }
+
   function loadVoices() {
     voices = (synth?.getVoices() || []).slice();
     voices.sort((a, b) => {
       const aKo = /^ko/i.test(a.lang) ? 0 : 1;
       const bKo = /^ko/i.test(b.lang) ? 0 : 1;
       if (aKo !== bKo) return aKo - bKo;
+      const aOn = isLikelyOnline(a) ? 1 : 0;
+      const bOn = isLikelyOnline(b) ? 1 : 0;
+      if (aOn !== bOn) return aOn - bOn;
       return a.name.localeCompare(b.name);
     });
+
+    const filtered = settings.onlyKorean
+      ? voices.filter((v) => /^ko/i.test(v.lang))
+      : voices;
+    const list = filtered.length ? filtered : voices;
+
     el.voiceSelect.innerHTML = "";
-    if (voices.length === 0) {
+    if (list.length === 0) {
       const opt = document.createElement("option");
       opt.textContent = "기본 음성";
       opt.value = "";
       el.voiceSelect.appendChild(opt);
     } else {
-      for (const v of voices) {
-        const opt = document.createElement("option");
-        opt.textContent = `${v.name} (${v.lang})${v.default ? " ★" : ""}`;
-        opt.value = v.voiceURI;
-        el.voiceSelect.appendChild(opt);
+      // Group local vs online for clarity
+      const groups = [
+        { label: "로컬 (권장, 항상 재생 가능)", items: list.filter((v) => !isLikelyOnline(v)) },
+        { label: "온라인 (Edge에서만 재생 가능)", items: list.filter((v) => isLikelyOnline(v)) },
+      ];
+      for (const g of groups) {
+        if (!g.items.length) continue;
+        const og = document.createElement("optgroup");
+        og.label = g.label;
+        for (const v of g.items) {
+          const opt = document.createElement("option");
+          opt.textContent = `${v.name} (${v.lang})${v.default ? " ★" : ""}`;
+          opt.value = v.voiceURI;
+          og.appendChild(opt);
+        }
+        el.voiceSelect.appendChild(og);
       }
     }
+
     const savedURI = settings.voiceURI;
     selectedVoice =
       voices.find((v) => v.voiceURI === savedURI) ||
+      voices.find((v) => /^ko/i.test(v.lang) && !isLikelyOnline(v)) ||
       voices.find((v) => /^ko/i.test(v.lang)) ||
       voices[0] ||
       null;
@@ -142,14 +176,33 @@
     if (!synth || !text) return;
     try {
       if (opts.priority) synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      if (selectedVoice) u.voice = selectedVoice;
-      u.lang = selectedVoice?.lang || "ko-KR";
-      u.rate = clamp(Number(settings.voiceRate) || 1, 0.5, 2);
-      u.pitch = clamp(Number(settings.voicePitch) || 1, 0.5, 2);
-      u.volume = 1;
-      synth.speak(u);
+      _speakWith(text, selectedVoice, opts, /*fellBack*/ false);
     } catch (_) {}
+  }
+
+  function _speakWith(text, voice, opts, fellBack) {
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice?.lang || "ko-KR";
+    u.rate = clamp(Number(settings.voiceRate) || 1, 0.5, 2);
+    u.pitch = clamp(Number(settings.voicePitch) || 1, 0.5, 2);
+    u.volume = 1;
+
+    // If a picked voice fails (common with Chrome + Online/Natural voices),
+    // fall back to the first available local Korean voice, once.
+    u.onerror = () => {
+      if (fellBack) return;
+      const fallback = voices.find((v) => /^ko/i.test(v.lang) && !isLikelyOnline(v))
+                    || voices.find((v) => !isLikelyOnline(v));
+      if (fallback && fallback !== voice) {
+        selectedVoice = fallback;
+        el.voiceSelect.value = fallback.voiceURI;
+        settings.voiceURI = fallback.voiceURI;
+        saveSettings();
+        try { _speakWith(text, fallback, opts, true); } catch (_) {}
+      }
+    };
+    synth.speak(u);
   }
 
   // ---- Audio (beep) ----
@@ -479,6 +532,9 @@
   // ---- Settings ----
   function loadSettings() {
     try {
+      // Remove older versions so their outdated defaults don't leak in.
+      try { localStorage.removeItem("workout-timer.settings.v2"); } catch (_) {}
+      try { localStorage.removeItem("bridge-timer.settings.v1"); } catch (_) {}
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return deepClone(DEFAULTS);
       const parsed = JSON.parse(raw);
@@ -533,6 +589,7 @@
     el.voiceRateRange.value = settings.voiceRate;
     el.voicePitch.value = Number(settings.voicePitch).toFixed(2);
     el.voicePitchRange.value = settings.voicePitch;
+    el.onlyKorean.checked = settings.onlyKorean !== false;
     el.encourage.checked = !!settings.encourage;
     el.beeps.checked = !!settings.beeps;
 
@@ -586,6 +643,11 @@
 
   el.encourage.addEventListener("change", () => { settings.encourage = el.encourage.checked; saveSettings(); });
   el.beeps.addEventListener("change", () => { settings.beeps = el.beeps.checked; saveSettings(); });
+  el.onlyKorean.addEventListener("change", () => {
+    settings.onlyKorean = el.onlyKorean.checked;
+    saveSettings();
+    loadVoices();
+  });
   el.voiceSelect.addEventListener("change", () => {
     settings.voiceURI = el.voiceSelect.value;
     selectedVoice = voices.find((v) => v.voiceURI === settings.voiceURI) || selectedVoice;
