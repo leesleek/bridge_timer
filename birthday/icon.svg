@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a1c55"/>
+      <stop offset="1" stop-color="#12091b"/>
+    </linearGradient>
+    <linearGradient id="cake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9ec6"/>
+      <stop offset="1" stop-color="#ff5f9e"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+
+  <!-- 촛불 -->
+  <g>
+    <rect x="92" y="46" width="8" height="26" rx="4" fill="#ffe6b0"/>
+    <path d="M96 30c8 9 11 13 11 18a11 11 0 0 1-22 0c0-5 3-9 11-18z" fill="#ffc861"/>
+    <path d="M96 42c4 5 5 7 5 9.5a5 5 0 0 1-10 0c0-2.5 1-4.5 5-9.5z" fill="#fff3d0"/>
+  </g>
+
+  <!-- 케이크 윗면 크림 -->
+  <path d="M40 84h112c6 0 10 4 10 10v10H30V94c0-6 4-10 10-10z" fill="#ffe6b0"/>
+  <!-- 케이크 몸통 -->
+  <path d="M30 104h132v38c0 7-5 12-12 12H42c-7 0-12-5-12-12v-38z" fill="url(#cake)"/>
+  <!-- 크림 물결 -->
+  <path d="M30 104c9 0 9 9 18 9s9-9 18-9 9 9 18 9 9-9 18-9 9 9 18 9 9-9 18-9 9 9 18 9v-10H30z" fill="#fff0f6" opacity="0.9"/>
+
+  <!-- 장식 점 -->
+  <circle cx="60" cy="130" r="5" fill="#ffe6b0" opacity="0.85"/>
+  <circle cx="96" cy="138" r="5" fill="#ffe6b0" opacity="0.85"/>
+  <circle cx="132" cy="130" r="5" fill="#ffe6b0" opacity="0.85"/>
+</svg>

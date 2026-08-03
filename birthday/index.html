@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#12091b" />
+<title>우리 가족 생일</title>
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" href="./icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="./icon.svg" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="가족 생일" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <button id="btn-back" class="icon-btn" hidden aria-label="뒤로">←</button>
+  <h1 id="title">우리 가족 생일</h1>
+  <button id="btn-settings" class="icon-btn" aria-label="설정">⚙︎</button>
+</header>
+
+<!-- ── 기본 화면 ───────────────────────────────────────── -->
+<main id="view-home" class="view">
+  <p id="today" class="today"></p>
+  <div id="cards" class="cards"></div>
+  <p id="empty" class="empty" hidden>구성원이 없습니다. 설정에서 추가해 주세요.</p>
+  <p class="foot-note">음력 생일은 한국천문연구원(KASI) 자료를 바탕으로 해당 연도의 양력 날짜로 변환해 보여줍니다.</p>
+</main>
+
+<!-- ── 설정 화면 ───────────────────────────────────────── -->
+<main id="view-settings" class="view" hidden>
+
+  <section class="card">
+    <h2>구성원</h2>
+    <div id="member-list" class="member-list"></div>
+    <button id="btn-add" class="btn btn-primary wide">+ 구성원 추가</button>
+  </section>
+
+  <section class="card">
+    <h2>생일 알림</h2>
+
+    <label class="row switch-row">
+      <span>알림 사용</span>
+      <input type="checkbox" id="alarm-enabled" class="switch" />
+    </label>
+    <p id="perm-note" class="hint"></p>
+
+    <label class="row">
+      <span>알림 기준 시각</span>
+      <input type="time" id="alarm-time" />
+    </label>
+    <p class="hint">아래 “○○ 전”은 모두 <b>생일 당일 이 시각</b>을 기준으로 계산합니다.</p>
+
+    <div class="field">
+      <span class="field-label">미리 알림</span>
+      <div class="chips" id="offset-chips">
+        <label class="chip"><input type="checkbox" data-offset="month" /><span>한 달 전</span></label>
+        <label class="chip"><input type="checkbox" data-offset="week" /><span>1주일 전</span></label>
+        <label class="chip"><input type="checkbox" data-offset="day" /><span>하루 전</span></label>
+        <label class="chip"><input type="checkbox" data-offset="hour" /><span>1시간 전</span></label>
+        <label class="chip"><input type="checkbox" data-offset="sameday" /><span>당일</span></label>
+        <label class="chip"><input type="checkbox" data-offset="custom" /><span>직접 설정</span></label>
+      </div>
+    </div>
+
+    <div class="row" id="custom-row" hidden>
+      <span>직접 설정</span>
+      <span class="inline">
+        <input type="number" id="custom-value" min="1" max="365" step="1" />
+        <select id="custom-unit">
+          <option value="day">일 전</option>
+          <option value="hour">시간 전</option>
+          <option value="minute">분 전</option>
+        </select>
+      </span>
+    </div>
+
+    <label class="row">
+      <span>알림음</span>
+      <span class="inline">
+        <select id="alarm-sound">
+          <option value="birthday">생일 축하 멜로디</option>
+          <option value="chime">딩동 차임</option>
+          <option value="bell">종소리</option>
+          <option value="marimba">마림바</option>
+          <option value="beep">전자음</option>
+          <option value="none">무음</option>
+        </select>
+        <button id="btn-preview" class="btn btn-ghost">미리듣기</button>
+      </span>
+    </label>
+
+    <label class="row switch-row">
+      <span>진동</span>
+      <input type="checkbox" id="alarm-vibrate" class="switch" />
+    </label>
+
+    <div class="notice">
+      <b>휴대폰에서 확실하게 알림을 받으려면</b><br />
+      웹 앱은 완전히 종료된 상태에서는 알림을 울리지 못할 수 있습니다.
+      아래 “캘린더에 등록”으로 <code>.ics</code> 파일을 내려받아 휴대폰 캘린더에 넣어 두면
+      앱을 켜지 않아도 기기 자체 알림이 울립니다.
+    </div>
+    <button id="btn-ics" class="btn wide">📅 캘린더에 등록 (.ics 내려받기)</button>
+
+    <p id="next-alarm" class="hint"></p>
+  </section>
+
+  <section class="card">
+    <h2>데이터</h2>
+    <div class="btn-row">
+      <button id="btn-export" class="btn">백업 파일 저장</button>
+      <button id="btn-import" class="btn">백업 불러오기</button>
+      <button id="btn-reset" class="btn btn-danger">기본값으로 초기화</button>
+    </div>
+    <input type="file" id="import-file" accept="application/json,.json" hidden />
+    <p class="hint">모든 정보는 이 휴대폰 안에만 저장됩니다. 앱 데이터를 지우면 함께 사라지니 가끔 백업해 두세요.</p>
+  </section>
+
+</main>
+
+<!-- ── 구성원 편집 시트 ────────────────────────────────── -->
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-inner">
+    <div class="sheet-head">
+      <h2 id="sheet-title">구성원 편집</h2>
+      <button id="sheet-close" class="icon-btn" aria-label="닫기">✕</button>
+    </div>
+
+    <div class="photo-edit">
+      <div id="photo-preview" class="avatar avatar-lg"></div>
+      <div class="btn-row">
+        <button id="btn-photo" class="btn">사진 선택</button>
+        <button id="btn-photo-del" class="btn btn-ghost">사진 삭제</button>
+      </div>
+      <input type="file" id="photo-file" accept="image/*" hidden />
+    </div>
+
+    <label class="row"><span>이름</span><input type="text" id="f-name" maxlength="20" placeholder="예: 이현승" /></label>
+    <label class="row"><span>관계</span>
+      <input type="text" id="f-relation" maxlength="20" list="relations" placeholder="예: 아버지" />
+      <datalist id="relations">
+        <option value="아버지"></option><option value="어머니"></option>
+        <option value="형제자매"></option><option value="배우자"></option>
+        <option value="아들"></option><option value="딸"></option>
+        <option value="할아버지"></option><option value="할머니"></option>
+        <option value="가족"></option>
+      </datalist>
+    </label>
+
+    <div class="field">
+      <span class="field-label">생일 기준</span>
+      <div class="seg">
+        <label><input type="radio" name="cal" value="lunar" /><span>음력</span></label>
+        <label><input type="radio" name="cal" value="solar" /><span>양력</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">생년월일</span>
+      <div class="ymd">
+        <input type="number" id="f-year" min="1900" max="2050" step="1" inputmode="numeric" /><span class="unit">년</span>
+        <select id="f-month"></select>
+        <input type="number" id="f-day" min="1" max="30" step="1" inputmode="numeric" /><span class="unit">일</span>
+      </div>
+      <label class="check" id="leap-wrap"><input type="checkbox" id="f-leap" /><span>윤달</span></label>
+    </div>
+
+    <div class="field">
+      <span class="field-label">태어난 시각 <em>(선택)</em></span>
+      <div class="inline">
+        <select id="f-branch"></select>
+        <input type="time" id="f-time" />
+      </div>
+    </div>
+
+    <label class="row switch-row"><span>이 구성원 알림 받기</span><input type="checkbox" id="f-alarm" class="switch" /></label>
+
+    <p id="f-preview" class="preview"></p>
+    <p id="f-error" class="error" hidden></p>
+
+    <div class="sheet-actions">
+      <button id="f-delete" class="btn btn-danger">삭제</button>
+      <button id="f-save" class="btn btn-primary">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="./lunar.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

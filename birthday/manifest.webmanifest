@@ -1,0 +1,15 @@
+{
+  "name": "우리 가족 생일",
+  "short_name": "가족생일",
+  "description": "음력 생일을 올해의 양력 날짜로 자동 변환해 보여주는 가족 생일 알림 앱",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12091b",
+  "theme_color": "#12091b",
+  "lang": "ko-KR",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
