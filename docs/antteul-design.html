@@ -1,0 +1,945 @@
+<title>안뜰 캠퍼스 장터</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;500;700&amp;family=IBM+Plex+Sans+KR:wght@300;400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --surface2:#E9EEE8; --line:#D3DCD2; --line-soft:#E2E9E1;
+  --ink:#16201A; --ink2:#4B5A50; --muted:#75857A;
+  --primary:#2C5A49; --primary-soft:#DCE9E2; --primary-ink:#1F4436;
+  --ochre:#B06A22; --ochre-soft:#F6E8D6;
+  --danger:#A93226; --danger-soft:#F7E1DE;
+  --info:#2B5D80; --info-soft:#DFEAF2;
+  --shadow:0 1px 2px rgba(22,32,26,.05), 0 8px 24px -16px rgba(22,32,26,.28);
+  --mono:"IBM Plex Mono","SFMono-Regular",Menlo,monospace;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --serif:"Hahmlet","Nanum Myeongjo","Apple SD Gothic Neo",Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111614; --surface:#19201C; --surface2:#212A24; --line:#2F3A33; --line-soft:#252E28;
+    --ink:#E8EEE9; --ink2:#B4C2B9; --muted:#8A998F;
+    --primary:#79BFA1; --primary-soft:#1D2E27; --primary-ink:#9BD3BA;
+    --ochre:#D99B57; --ochre-soft:#33281C;
+    --danger:#E48377; --danger-soft:#341F1C;
+    --info:#82B4D6; --info-soft:#1B2932;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#19201C; --surface2:#212A24; --line:#2F3A33; --line-soft:#252E28;
+  --ink:#E8EEE9; --ink2:#B4C2B9; --muted:#8A998F;
+  --primary:#79BFA1; --primary-soft:#1D2E27; --primary-ink:#9BD3BA;
+  --ochre:#D99B57; --ochre-soft:#33281C;
+  --danger:#E48377; --danger-soft:#341F1C;
+  --info:#82B4D6; --info-soft:#1B2932;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-weight:400; line-height:1.72; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1200px; margin:0 auto; padding:0 28px 96px;}
+
+/* ---------- masthead ---------- */
+.head{padding:72px 0 40px; border-bottom:1px solid var(--line);}
+.eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ochre); margin:0 0 20px;}
+.head h1{font-family:var(--serif); font-weight:700; font-size:clamp(46px,7.5vw,86px); line-height:1.02; letter-spacing:-.02em; margin:0; text-wrap:balance; color:var(--primary-ink);}
+.head .sub{font-family:var(--serif); font-weight:400; font-size:clamp(19px,2.4vw,26px); line-height:1.45; color:var(--ink2); margin:14px 0 0; max-width:22ch;}
+.deck{max-width:62ch; margin:26px 0 0; font-size:16.5px; color:var(--ink2);}
+.metabar{display:flex; flex-wrap:wrap; gap:0 40px; margin-top:32px; padding-top:22px; border-top:1px solid var(--line-soft);}
+.metabar div{display:flex; flex-direction:column; gap:2px;}
+.metabar dt{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);}
+.metabar dd{margin:0; font-size:14.5px; font-weight:500;}
+
+/* ---------- layout ---------- */
+.layout{display:grid; grid-template-columns:1fr; gap:40px; margin-top:44px;}
+@media(min-width:1040px){ .layout{grid-template-columns:206px minmax(0,1fr); gap:64px;} }
+.toc{align-self:start; font-size:13.5px; line-height:1.55;}
+@media(min-width:1040px){ .toc{position:sticky; top:28px; max-height:calc(100vh - 56px); overflow-y:auto;} }
+.toc p{font-family:var(--mono); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin:0 0 12px;}
+.toc ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;}
+.toc a{display:flex; gap:9px; text-decoration:none; color:var(--ink2); padding:4px 8px; border-radius:5px; border-left:2px solid transparent;}
+.toc a:hover{background:var(--surface2); color:var(--ink);}
+.toc a.on{color:var(--primary-ink); border-left-color:var(--primary); background:var(--primary-soft); font-weight:500;}
+.toc a span{font-family:var(--mono); font-size:11px; color:var(--muted); padding-top:2px;}
+.toc a.on span{color:var(--primary-ink);}
+main{min-width:0;}
+section{padding:52px 0 4px; scroll-margin-top:24px;}
+section+section{border-top:1px solid var(--line-soft);}
+h2{font-family:var(--serif); font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-.015em; margin:0 0 8px; text-wrap:balance;}
+h2 .n{font-family:var(--mono); font-weight:400; font-size:.5em; color:var(--ochre); letter-spacing:.05em; margin-right:.7em; vertical-align:.28em;}
+.lede{max-width:66ch; color:var(--ink2); font-size:16px; margin:0 0 30px;}
+h3{font-family:var(--sans); font-weight:600; font-size:17px; letter-spacing:-.005em; margin:38px 0 10px; color:var(--ink);}
+h4{font-family:var(--mono); font-weight:500; font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--muted); margin:26px 0 10px;}
+p,li{font-size:15.5px;}
+p{max-width:68ch; margin:0 0 15px;}
+ul,ol{max-width:68ch; padding-left:20px; margin:0 0 16px;}
+li{margin-bottom:6px;}
+li::marker{color:var(--muted);}
+strong{font-weight:600; color:var(--ink);}
+a{color:var(--primary-ink);}
+code{font-family:var(--mono); font-size:.87em; background:var(--surface2); padding:1px 5px; border-radius:4px; color:var(--ink);}
+pre{font-family:var(--mono); font-size:12.5px; line-height:1.62; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:18px 20px; overflow-x:auto; margin:0 0 20px;}
+pre code{background:none; padding:0; font-size:inherit;}
+
+/* ---------- tables ---------- */
+.tbl{overflow-x:auto; margin:0 0 22px; border:1px solid var(--line); border-radius:9px; background:var(--surface);}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:520px;}
+th{font-family:var(--mono); font-weight:500; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-align:left; padding:12px 16px; border-bottom:1px solid var(--line); white-space:nowrap; background:var(--surface2);}
+td{padding:11px 16px; border-bottom:1px solid var(--line-soft); vertical-align:top; line-height:1.55;}
+tr:last-child td{border-bottom:none;}
+td.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap;}
+td.k{font-weight:500; white-space:nowrap;}
+
+/* ---------- callouts ---------- */
+.note{border-left:3px solid var(--ochre); background:var(--ochre-soft); padding:15px 20px; border-radius:0 8px 8px 0; margin:0 0 24px; max-width:72ch;}
+.note.warn{border-left-color:var(--danger); background:var(--danger-soft);}
+.note.info{border-left-color:var(--info); background:var(--info-soft);}
+.note p{margin:0 0 8px; font-size:14.5px;}
+.note p:last-child{margin:0;}
+.note b{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:6px; color:var(--ochre);}
+.note.warn b{color:var(--danger);}
+.note.info b{color:var(--info);}
+
+/* ---------- cards ---------- */
+.cards{display:grid; gap:16px; margin:0 0 24px;}
+@media(min-width:700px){ .cards.c2{grid-template-columns:1fr 1fr;} .cards.c3{grid-template-columns:repeat(3,1fr);} }
+.card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:20px 22px;}
+.card h5{margin:0 0 4px; font-size:15px; font-weight:600;}
+.card .role{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ochre); margin:0 0 12px;}
+.card ul{padding-left:17px; margin:0;}
+.card li,.card p{font-size:13.8px; line-height:1.6;}
+.card p{margin:0 0 10px;}
+.card p:last-child{margin:0;}
+
+/* feature list with priority pills */
+.feat{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px;}
+.feat li{display:grid; grid-template-columns:26px 1fr; gap:10px; align-items:baseline; margin:0; font-size:13.8px; line-height:1.55;}
+.pill{font-family:var(--mono); font-size:9.5px; font-weight:500; letter-spacing:.06em; padding:2px 0; border-radius:4px; text-align:center; display:block;}
+.p-m{background:var(--primary); color:var(--surface);}
+:root[data-theme="dark"] .p-m, :root:not([data-theme="light"]) .p-m{color:#111614;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .p-m{color:#111614;} }
+.p-s{background:var(--primary-soft); color:var(--primary-ink);}
+.p-c{background:var(--surface2); color:var(--muted);}
+
+/* ---------- summary key-values ---------- */
+.kv{display:grid; gap:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface); margin:0 0 26px;}
+@media(min-width:760px){ .kv{grid-template-columns:150px 1fr;} }
+.kv dt{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:14px 18px; background:var(--surface2); border-bottom:1px solid var(--line-soft);}
+.kv dd{margin:0; padding:14px 20px; font-size:14.8px; border-bottom:1px solid var(--line-soft);}
+@media(max-width:759px){ .kv dt{border-bottom:none; padding-bottom:4px; background:var(--surface);} }
+.kv dt:last-of-type,.kv dd:last-of-type{border-bottom:none;}
+
+/* ---------- calendar strip ---------- */
+.cal{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin:0 0 12px;}
+@media(min-width:820px){ .cal{grid-template-columns:repeat(12,1fr);} }
+.mo{border:1px solid var(--line); border-radius:7px; padding:9px 8px 11px; background:var(--surface); min-height:96px;}
+.mo b{display:block; font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:500;}
+.mo span{font-size:11.8px; line-height:1.4; display:block; color:var(--ink2);}
+.mo.peak{background:var(--primary-soft); border-color:var(--primary);}
+.mo.peak b{color:var(--primary-ink);}
+.mo.peak span{color:var(--primary-ink); font-weight:500;}
+
+/* ---------- wireframes ---------- */
+.frames{display:flex; gap:22px; overflow-x:auto; padding:6px 2px 20px; margin:0 0 8px;}
+.phone{flex:0 0 auto; width:230px;}
+.phone .cap{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 9px; padding-left:2px;}
+.scr{border:2px solid var(--line); border-radius:18px; background:var(--surface); overflow:hidden; height:412px; display:flex; flex-direction:column; box-shadow:var(--shadow);}
+.bar{background:var(--primary); color:#fff; padding:8px 12px; font-size:11.5px; font-weight:500; display:flex; justify-content:space-between; align-items:center;}
+:root[data-theme="dark"] .bar,:root:not([data-theme="light"]) .bar{color:#111614;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .bar{color:#111614;} }
+.bar em{font-style:normal; font-size:10px; opacity:.85;}
+.body{padding:10px; display:flex; flex-direction:column; gap:7px; flex:1; overflow:hidden;}
+.row{display:flex; gap:8px; align-items:center; border:1px solid var(--line-soft); border-radius:7px; padding:7px 8px; background:var(--bg);}
+.thumb{width:34px; height:34px; border-radius:5px; background:var(--surface2); flex:0 0 auto; border:1px solid var(--line-soft);}
+.row .t{font-size:10.5px; line-height:1.35; min-width:0;}
+.row .t b{display:block; font-weight:500; font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.row .t i{font-style:normal; color:var(--muted); font-size:9.5px;}
+.chips{display:flex; gap:4px; flex-wrap:wrap;}
+.chip{font-size:9.5px; padding:3px 7px; border-radius:20px; background:var(--surface2); color:var(--ink2); white-space:nowrap;}
+.chip.on{background:var(--primary); color:#fff;}
+:root[data-theme="dark"] .chip.on,:root:not([data-theme="light"]) .chip.on{color:#111614;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .chip.on{color:#111614;} }
+.bubble{max-width:78%; font-size:10.5px; padding:6px 9px; border-radius:11px; line-height:1.4;}
+.bubble.them{background:var(--surface2); align-self:flex-start; border-bottom-left-radius:3px;}
+.bubble.me{background:var(--primary-soft); color:var(--primary-ink); align-self:flex-end; border-bottom-right-radius:3px;}
+.slot{border:1px dashed var(--line); border-radius:7px; padding:8px; font-size:10px; color:var(--muted); line-height:1.45;}
+.slot b{display:block; color:var(--ink2); font-size:10.5px; font-weight:500; margin-bottom:2px;}
+.tabs{display:flex; border-top:1px solid var(--line); background:var(--surface);}
+.tabs span{flex:1; text-align:center; font-size:8.5px; padding:7px 0; color:var(--muted);}
+.tabs span.on{color:var(--primary-ink); font-weight:600;}
+
+footer{margin-top:70px; padding-top:26px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); max-width:68ch;}
+:focus-visible{outline:2px solid var(--ochre); outline-offset:2px; border-radius:3px;}
+@media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth;} }
+</style>
+
+<div class="wrap">
+
+<header class="head">
+  <p class="eyebrow">제품 설계서 · v0.1 검토용 초안</p>
+  <h1>안뜰</h1>
+  <p class="sub">교대 구성원만 들어오는 캠퍼스 장터 겸 생활 게시판</p>
+  <p class="deck">학교 계정으로 신원이 확인된 사람끼리, 캠퍼스 안에서 만나 거래합니다. 당근이 GPS로 &lsquo;동네&rsquo;를 묶었다면 안뜰은 학교 이메일로 &lsquo;우리 학교&rsquo;를 묶습니다. 택배도 에스크로도 없고, 대신 걸어서 5분 거리에 상대가 있습니다.</p>
+  <dl class="metabar">
+    <div><dt>작성일</dt><dd>2026-09-02</dd></div>
+    <div><dt>대상</dt><dd>경인교육대학교</dd></div>
+    <div><dt>규모 가정</dt><dd>구성원 약 2,300명</dd></div>
+    <div><dt>MVP 기간</dt><dd>13주</dd></div>
+    <div><dt>운영비 목표</dt><dd>월 5만 원 이하</dd></div>
+  </dl>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="목차">
+  <p>목차</p>
+  <ol>
+    <li><a href="#s1"><span>01</span>한 장 요약</a></li>
+    <li><a href="#s2"><span>02</span>문제와 포지셔닝</a></li>
+    <li><a href="#s3"><span>03</span>사용자와 시나리오</a></li>
+    <li><a href="#s4"><span>04</span>기능 범위</a></li>
+    <li><a href="#s5"><span>05</span>신뢰와 안전</a></li>
+    <li><a href="#s6"><span>06</span>화면 설계</a></li>
+    <li><a href="#s7"><span>07</span>데이터 모델</a></li>
+    <li><a href="#s8"><span>08</span>기술 아키텍처</a></li>
+    <li><a href="#s9"><span>09</span>구성원 인증</a></li>
+    <li><a href="#s10"><span>10</span>법·학내 규정</a></li>
+    <li><a href="#s11"><span>11</span>초기 확산 전략</a></li>
+    <li><a href="#s12"><span>12</span>로드맵과 공수</a></li>
+    <li><a href="#s13"><span>13</span>비용</a></li>
+    <li><a href="#s14"><span>14</span>성공 지표</a></li>
+    <li><a href="#s15"><span>15</span>리스크</a></li>
+    <li><a href="#s16"><span>16</span>확인이 필요한 것</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="s1">
+  <h2><span class="n">01</span>한 장 요약</h2>
+  <p class="lede">아래 표만 읽어도 무엇을 만들 것인지 판단할 수 있어야 합니다. 나머지 절은 이 표의 근거입니다.</p>
+  <dl class="kv">
+    <dt>무엇을</dt><dd>교대 구성원 전용 중고거래 + 생활 커뮤니티 앱. 거래는 캠퍼스 내 직거래만, 커뮤니티는 학과·학년을 가로지르는 정보 게시판.</dd>
+    <dt>누구에게</dt><dd>재학생(약 1,900명), 대학원생, 교직원·교수(약 400명). 졸업생은 &lsquo;물려주기&rsquo; 목적의 6개월 유예 계정만.</dd>
+    <dt>왜 필요한가</dt><dd>지금은 에브리타임 장터 글, 학과 단톡, 카톡 오픈채팅에 흩어져 있어 검색이 안 되고, 기록이 남지 않으며, 학기가 끝나면 증발합니다. 당근을 쓰면 학교 밖 사람과 만나야 합니다.</dd>
+    <dt>핵심 차별점</dt><dd>① 학교 이메일 인증으로 신원이 확인된 폐쇄망 ② 캠퍼스 안전거래존 기반 직거래 ③ 교대 물품 분류 체계(임용 수험서·실기 도구·교생 정장·교구) ④ 졸업 시즌 물려주기</dd>
+    <dt>하지 않을 것</dt><dd>택배·배송 중개, 에스크로 결제, 강의평가, 익명 대나무숲 전면 대체, 타 대학 개방(1단계 한정)</dd>
+    <dt>기술 선택</dt><dd>Flutter 앱 + Supabase(서울 리전). 백엔드 서버를 직접 운영하지 않는 구조로, 학생 인력 교체에도 서비스가 죽지 않게 함.</dd>
+    <dt>1학기 목표</dt><dd>구성원 가입률 40%, 주간 신규 등록 30건, 주간 성사 거래·나눔 20건, 신고 처리 중앙값 12시간 이내</dd>
+    <dt>가장 큰 위험</dt><dd>거래량 부족(콜드스타트). 2,300명 규모에서는 하루 몇 건이 현실적 상한이므로, 거래만으로는 앱을 열 이유가 안 됩니다. → 11절 참조</dd>
+  </dl>
+  <div class="note">
+    <b>이 문서의 전제</b>
+    <p>학교를 경인교대(단일 캠퍼스, 구성원 약 2,300명)로, 개발 주체를 교내 팀(캡스톤·연구실 또는 학생 개발 동아리 2~4인)으로 가정했습니다. 규모가 다르거나 전국 교대 연합으로 간다면 8·10·13절의 결론이 바뀝니다. 16절에 확인이 필요한 항목을 모아 두었습니다.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span>문제와 포지셔닝</h2>
+  <p class="lede">교대에는 이미 커뮤니티가 있습니다. 그 자리를 뺏으려 하면 집니다. 비어 있는 자리를 정확히 찾아야 합니다.</p>
+
+  <h3>지금 벌어지는 일</h3>
+  <p>교대생의 중고 거래는 대부분 세 곳에서 일어납니다. 에브리타임 장터 게시판, 학과·학년 단톡방, 그리고 당근입니다. 각각의 한계가 안뜰의 존재 이유입니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>현재 수단</th><th>잘 되는 것</th><th>안 되는 것</th></tr></thead>
+    <tbody>
+      <tr><td class="k">에브리타임 장터</td><td>이미 모든 학생이 씀. 익명이라 부담 없음</td><td>글이 밀려 내려가면 끝. 사진 관리·검색·찜 없음. 판매자 신뢰도 판단 불가. 거래 후 기록 없음</td></tr>
+      <tr><td class="k">학과 단톡방</td><td>즉시 도달. 같은 학번이라 신뢰</td><td>같은 학과·학년 안에서만. 스크롤 지나가면 소멸. 안 팔리면 재게시 눈치</td></tr>
+      <tr><td class="k">당근</td><td>기능 완성도 최고</td><td>거래 상대가 학교 밖 사람. 캠퍼스 밖에서 만나야 함. 임용 수험서·실기 도구 같은 교대 품목은 검색 노출이 거의 없음</td></tr>
+      <tr><td class="k">카톡 오픈채팅</td><td>실시간</td><td>신원 불명. 사기·노쇼 대응 불가. 졸업하면 방 자체가 사라짐</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>교대라서 다른 점</h3>
+  <p>이 설계에서 가장 중요한 부분입니다. 종합대 중고장터를 그대로 옮기면 실패합니다. 교대는 다음 네 가지가 구조적으로 다릅니다.</p>
+  <ul>
+    <li><strong>물품이 4년 주기로 돌 수밖에 없습니다.</strong> 전공서적, 임용 수험서, 실기 도구(디지털피아노·리코더·단소·오카리나), 미술 재료, 교생실습 정장은 특정 학년에 반드시 필요하고 그 학년이 지나면 반드시 필요 없어집니다. 공급자와 수요자가 학번으로 정확히 갈립니다.</li>
+    <li><strong>구성원이 적고 서로 압니다.</strong> 한 학년 500명 이하, 학과당 40~60명 규모라 익명성이 사실상 없습니다. 사기 위험은 극히 낮지만, 평판 위험은 대단히 높습니다. 신뢰 설계의 방향이 당근과 정반대여야 합니다(5절).</li>
+    <li><strong>연간 리듬이 뚜렷합니다.</strong> 3월 개강(교재 수요 폭증), 6월 종강(교재 처분), 9월 교생실습(정장·교구), 11월 임용(수험서 폐기·나눔), 12월~2월 졸업(자취방·기숙사 대량 정리). 거래량이 균등하지 않고 연 4회 스파이크로 몰립니다.</li>
+    <li><strong>선후배 물려주기 문화가 이미 있습니다.</strong> 다만 아는 후배가 있어야 가능합니다. 이 비공식 관행을 제품화하는 것이 안뜰의 가장 강한 훅입니다.</li>
+  </ul>
+
+  <h3>포지셔닝</h3>
+  <div class="cards c3">
+    <div class="card"><p class="role">에브리타임</p><h5>익명 잡담과 정보</h5><p>대체하지 않습니다. 익명 커뮤니티는 이미 승자가 있고, 안뜰이 이길 이유도 없습니다.</p></div>
+    <div class="card"><p class="role">당근</p><h5>동네 기반 범용 거래</h5><p>학교 밖으로 나가야 하는 물건(가구, 가전, 자전거)은 계속 당근입니다.</p></div>
+    <div class="card"><p class="role">안뜰</p><h5>신원 확인된 캠퍼스 안 거래와 실명 정보</h5><p>학교 계정이 필요한 것, 캠퍼스 안에서 끝나는 것, 기록이 남아야 하는 것만 가져옵니다.</p></div>
+  </div>
+  <div class="note info">
+    <b>한 문장 포지셔닝</b>
+    <p>&ldquo;교대 안에서만 통하는 물건을, 교대 사람인 게 확인된 사람에게, 걸어가서 받는 곳.&rdquo; 이 문장에 해당하지 않는 기능 요청은 전부 후순위로 미룹니다.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span>사용자와 시나리오</h2>
+  <p class="lede">페르소나 넷과, 각 페르소나가 앱을 처음 연 3분 안에 하는 일입니다. 이 3분이 안 되면 나머지 기능은 의미가 없습니다.</p>
+  <div class="cards c2">
+    <div class="card">
+      <p class="role">1학년 · 3월</p><h5>교재를 싸게 구하고 싶은 신입생</h5>
+      <p>수강신청 직후 교재 목록을 받았는데 새 책으로 사면 20만 원이 넘습니다. 선배가 누군지 모릅니다.</p>
+      <p><b>첫 3분</b> 가입 → 수강 과목 코드 3개 입력 → 해당 교재 판매글 자동 매칭 목록 → 찜 2개, 채팅 1개.</p>
+    </div>
+    <div class="card">
+      <p class="role">3학년 · 9월</p><h5>교생실습을 앞둔 학생</h5>
+      <p>4주만 입을 정장과 구두, 명찰, 실습 교구가 필요합니다. 사기는 아깝습니다.</p>
+      <p><b>첫 3분</b> &lsquo;교생실습&rsquo; 카테고리 → 사이즈 필터 → 대여·나눔 글 확인 → 실습 정보 게시판에서 배정 학교 후기 검색.</p>
+    </div>
+    <div class="card">
+      <p class="role">4학년 · 11월</p><h5>임용을 준비하는 수험생</h5>
+      <p>수험서가 매년 개정돼 작년 판본은 값이 급락합니다. 시험 끝나면 전부 짐입니다.</p>
+      <p><b>첫 3분</b> 판본 연도 태그로 검색 → 스터디 모집 글 확인 → 시험 후 &lsquo;일괄 나눔&rsquo;으로 12권 한 번에 등록.</p>
+    </div>
+    <div class="card">
+      <p class="role">교직원 · 상시</p><h5>연구실·행정실 물품 담당</h5>
+      <p>연구실 정리에서 나온 사무기기, 도서, 교구를 버리기는 아깝고 처리 절차는 번거롭습니다.</p>
+      <p><b>첫 3분</b> 교직원 배지가 붙은 계정으로 나눔 등록 → 선착순 대신 &lsquo;사유 적기&rsquo; 방식으로 수령자 선택.</p>
+    </div>
+  </div>
+
+  <h3>핵심 여정: 판매</h3>
+  <p>등록에 3분 이상 걸리면 사람들은 그냥 단톡방에 사진을 던집니다. 등록 화면은 이 기준으로만 평가합니다.</p>
+  <ol>
+    <li>카메라로 사진 촬영(최대 10장). 첫 장이 대표 이미지, 드래그로 순서 변경.</li>
+    <li>카테고리 선택 → 카테고리에 따라 <em>다음 입력 항목이 달라집니다</em>. 교재를 고르면 과목·판본 연도·필기 여부, 의류를 고르면 사이즈, 실기 도구를 고르면 상태 등급이 뜹니다.</li>
+    <li>가격 입력 또는 &lsquo;무료나눔&rsquo;·&lsquo;가격 제안 받기&rsquo; 토글.</li>
+    <li>희망 거래 장소를 안전거래존 목록에서 선택(기본값: 직전 거래 장소).</li>
+    <li>등록 → 해당 카테고리를 찜해 둔 사용자에게 푸시.</li>
+  </ol>
+
+  <h3>핵심 여정: 구매와 만남</h3>
+  <p>거래 사고의 대부분은 &lsquo;약속&rsquo; 단계에서 생깁니다. 노쇼, 시간 착오, 장소 착오입니다. 채팅에 자유 대화만 두지 않고 <strong>약속 카드</strong>를 구조화된 객체로 넣습니다.</p>
+  <ul>
+    <li>채팅방 상단에 항상 물품 카드가 고정됩니다(가격·상태·판매중/예약중).</li>
+    <li>판매자가 &lsquo;약속 잡기&rsquo;를 누르면 장소·날짜·시간 선택 카드가 채팅에 삽입되고, 구매자가 수락하면 양쪽 캘린더 알림이 잡힙니다. 30분 전 푸시.</li>
+    <li>약속이 확정되면 물품 상태가 자동으로 &lsquo;예약중&rsquo;으로 바뀌고 다른 사람의 채팅 요청은 대기열로 갑니다.</li>
+    <li>약속 시각 2시간 뒤 양쪽에 &ldquo;거래가 잘 끝났나요?&rdquo; 알림. 양쪽이 확인해야 &lsquo;거래완료&rsquo;가 되고, 이때만 평가가 열립니다(5절).</li>
+    <li>노쇼 신고는 이 시점에만 가능하며, 상대에게는 내용이 공개되지 않고 운영진에게만 누적됩니다.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span>기능 범위</h2>
+  <p class="lede">우선순위는 <span class="pill p-m" style="display:inline-block;padding:2px 7px">M</span> MVP 필수 · <span class="pill p-s" style="display:inline-block;padding:2px 7px">S</span> 정식 출시 · <span class="pill p-c" style="display:inline-block;padding:2px 7px">C</span> 검토 대상. M에 없는 것은 MVP에서 만들지 않습니다.</p>
+  <div class="cards c3">
+    <div class="card">
+      <p class="role">거래</p><h5>장터</h5>
+      <ul class="feat">
+        <li><span class="pill p-m">M</span><span>물품 등록·수정·삭제, 사진 10장, 카테고리별 동적 입력 항목</span></li>
+        <li><span class="pill p-m">M</span><span>목록·검색·필터(카테고리·가격대·나눔만·판매중만)</span></li>
+        <li><span class="pill p-m">M</span><span>찜, 조회수, 끌어올리기(24시간 1회 제한)</span></li>
+        <li><span class="pill p-m">M</span><span>1:1 채팅, 이미지 전송, 읽음 표시</span></li>
+        <li><span class="pill p-m">M</span><span>약속 카드(장소·시간), 예약중 상태, 거래완료 상호 확인</span></li>
+        <li><span class="pill p-m">M</span><span>안전거래존 목록과 캠퍼스 지도 표시</span></li>
+        <li><span class="pill p-s">S</span><span>키워드 알림(&ldquo;교육과정&rdquo; 등록되면 푸시)</span></li>
+        <li><span class="pill p-s">S</span><span>수강 과목 코드 → 교재 자동 매칭</span></li>
+        <li><span class="pill p-s">S</span><span>일괄 등록(사진 여러 장 → 여러 글), 대여·교환 유형</span></li>
+        <li><span class="pill p-c">C</span><span>가격 제안, 유사 물품 시세 안내</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="role">커뮤니티</p><h5>게시판</h5>
+      <ul class="feat">
+        <li><span class="pill p-m">M</span><span>게시판 8종, 글·댓글·대댓글, 좋아요</span></li>
+        <li><span class="pill p-m">M</span><span>표시 이름 3단계: 닉네임+소속 / 소속만 / 완전 익명(게시판별로 허용 범위 고정)</span></li>
+        <li><span class="pill p-m">M</span><span>분실물 게시판(습득/분실 구분, 사진, 보관 장소)</span></li>
+        <li><span class="pill p-m">M</span><span>신고·차단, 운영진 블라인드</span></li>
+        <li><span class="pill p-s">S</span><span>스터디·모임 모집(정원, 신청·수락, 모집 마감 자동)</span></li>
+        <li><span class="pill p-s">S</span><span>해시태그, 인기글, 스크랩</span></li>
+        <li><span class="pill p-s">S</span><span>교직원 공지 채널(읽기 전용, 작성 권한 제한)</span></li>
+        <li><span class="pill p-c">C</span><span>투표, 설문, 행사 캘린더</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <p class="role">교대 특화</p><h5>안뜰만의 것</h5>
+      <ul class="feat">
+        <li><span class="pill p-m">M</span><span>교대 카테고리 체계(아래 표) 및 학번 기반 &lsquo;내 학년 추천&rsquo;</span></li>
+        <li><span class="pill p-s">S</span><span><b style="font-weight:600">물려주기</b> — 졸업 예정자가 여러 물건을 한 묶음으로 내놓고, 후배가 &lsquo;받고 싶은 이유&rsquo;를 적어 신청하는 비가격 매칭</span></li>
+        <li><span class="pill p-s">S</span><span>임용·실기 스터디 매칭(과목·선발지역·시간대 조건)</span></li>
+        <li><span class="pill p-s">S</span><span>교생실습 정보(배정 학교별 후기, 복장 규정, 필요 물품 체크리스트)</span></li>
+        <li><span class="pill p-c">C</span><span>기숙사 층별 나눔 선반(오프라인 연계, 무인 수령)</span></li>
+        <li><span class="pill p-c">C</span><span>졸업생 유예 계정에서의 후배 멘토링</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>카테고리 체계</h3>
+  <p>카테고리는 검색의 품질을 결정합니다. 범용 분류(&lsquo;도서&rsquo;, &lsquo;생활용품&rsquo;)로는 &ldquo;2학년 초등수학교육 교재&rdquo;를 찾을 수 없습니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>대분류</th><th>중분류</th><th>추가 입력 항목</th></tr></thead>
+    <tbody>
+      <tr><td class="k">전공·교양 교재</td><td>교육학 / 교과교육 / 교양 / 원서</td><td>과목 코드, 판본 연도, 필기 정도(없음·약간·많음), 저자</td></tr>
+      <tr><td class="k">임용 수험</td><td>전공 / 교육학 / 인강 교재 / 모의고사</td><td>대비 연도, 출판사, 판본, 필기 정도</td></tr>
+      <tr><td class="k">실기 도구</td><td>건반·피아노 / 국악기(단소·소금·장구) / 리코더·오카리나 / 미술 재료 / 체육</td><td>상태 등급(A/B/C), 브랜드, 구입 시기</td></tr>
+      <tr><td class="k">교구·수업자료</td><td>실습 교구 / 학급 환경물 / 코팅·제작 도구 / 교육 자료집</td><td>대상 학년, 교과</td></tr>
+      <tr><td class="k">교생실습</td><td>정장·구두 / 명찰·소품 / 실습 참고서</td><td>사이즈, 성별 구분, 대여 가능 여부</td></tr>
+      <tr><td class="k">전자기기</td><td>노트북·태블릿 / 필기도구(펜슬) / 주변기기</td><td>모델명, 구입 연도, A/S 잔여</td></tr>
+      <tr><td class="k">기숙사·자취</td><td>가전 / 가구 / 침구 / 주방</td><td>부피 등급(혼자 들 수 있음/둘이 필요/차량 필요)</td></tr>
+      <tr><td class="k">생활·의류</td><td>의류 / 잡화 / 도서(비전공) / 티켓·기프티콘</td><td>사이즈</td></tr>
+      <tr><td class="k">무료나눔</td><td>—</td><td>수령 방식(선착순 / 사유 적기 / 지정)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <b>부피 등급이 왜 필요한가</b>
+    <p>캠퍼스 직거래만 지원하므로 &lsquo;들고 갈 수 있는가&rsquo;가 구매 결정의 핵심 변수입니다. 기숙사 냉장고를 도서관 앞에서 받을 수는 없습니다. 부피 등급이 &lsquo;차량 필요&rsquo;면 안전거래존 대신 기숙사 주차장·후문 하차장이 기본 장소로 제안됩니다.</p>
+  </div>
+
+  <h3>게시판 구성과 표시 이름 정책</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>게시판</th><th>표시 이름</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td class="k">수업·과제 질문</td><td>닉네임 + 학과·학번</td><td>답변의 신뢰도가 소속에 달려 있음</td></tr>
+      <tr><td class="k">스터디·모임 모집</td><td>닉네임 + 학과·학번</td><td>같이 공부할 사람을 익명으로 뽑을 수 없음</td></tr>
+      <tr><td class="k">분실물</td><td>닉네임 + 학과</td><td>연락과 인계가 목적</td></tr>
+      <tr><td class="k">교생실습 정보</td><td>학번만(학과 비공개)</td><td>배정 학교 후기는 특정 가능성이 있어 소속을 가림</td></tr>
+      <tr><td class="k">정보 공유·꿀팁</td><td>닉네임</td><td>—</td></tr>
+      <tr><td class="k">동아리·행사</td><td>닉네임 + 단체명</td><td>주최 책임 표시</td></tr>
+      <tr><td class="k">고민·상담</td><td>완전 익명(운영진도 즉시 조회 불가)</td><td>학내 인간관계·진로 고민은 익명이 아니면 글이 안 올라옴</td></tr>
+      <tr><td class="k">교직원 공지</td><td>실명 + 부서</td><td>공지의 권위</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note warn">
+    <b>익명 게시판을 넣을 것인가</b>
+    <p>넣되 하나로 제한하기를 권합니다. 2,300명 규모에서 익명 게시판은 빠르게 뒷담화 창구가 되고, 학내 분쟁이 생기면 운영 주체(학교 또는 학생 팀)가 법적 책임을 집니다. 대신 &lsquo;고민·상담&rsquo; 하나만 열고, ① 댓글은 작성자와 운영진만 볼 수 있는 1:1 답글 구조, ② 특정인 지칭 자동 차단(실명·학번·학과+학번 패턴), ③ 신고 3회 시 자동 블라인드 후 검토를 겁니다. 익명 데이터도 작성자 ID는 저장되며(법적 대응 필요 시), 접근은 감사 로그가 남는 2인 승인 절차로만 가능하게 합니다.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>신뢰와 안전</h2>
+  <p class="lede">당근의 매너온도를 그대로 가져오면 안 됩니다. 서로 아는 2,300명 커뮤니티에서 공개 평판 점수는 다르게 작동합니다.</p>
+
+  <h3>매너온도를 쓰지 않는 이유</h3>
+  <p>당근의 36.5도 시스템은 익명의 대규모 모집단에서 작동합니다. 점수가 낮아도 다른 동네로 가면 그만이고, 상대를 다시 만날 일이 없습니다. 교대는 반대입니다. 낮은 점수를 받은 학생은 4년 동안 같은 건물에서 그 사람을 마주칩니다. 결과는 두 가지로 나타납니다. 아무도 부정적 평가를 하지 않아 점수가 의미를 잃거나, 한 번의 분쟁이 보복 평가로 번져 학내 갈등이 됩니다. 어느 쪽이든 실패입니다.</p>
+
+  <h3>대신 쓰는 것: 행동 지표</h3>
+  <p>주관적 점수를 공개하지 않고, <strong>거짓말할 수 없는 행동 기록</strong>만 공개합니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>프로필에 공개</th><th>산출</th><th>왜 이것인가</th></tr></thead>
+    <tbody>
+      <tr><td class="k">완료 거래 수</td><td>양측이 완료 확인한 건수</td><td>조작 불가. 실적이 곧 신뢰</td></tr>
+      <tr><td class="k">평균 응답 시간</td><td>첫 채팅 수신 → 첫 답장 중앙값</td><td>거래에서 가장 흔한 불만은 &lsquo;읽씹&rsquo;</td></tr>
+      <tr><td class="k">약속 이행률</td><td>확정 약속 중 완료된 비율</td><td>노쇼가 직거래의 최대 비용</td></tr>
+      <tr><td class="k">나눔 횟수</td><td>무료나눔 완료 건수</td><td>긍정 행동만 카운트해 상향 동기 부여</td></tr>
+      <tr><td class="k">가입 학기 / 소속</td><td>인증 정보</td><td>신원 확인 자체가 신뢰의 근거</td></tr>
+    </tbody>
+  </table></div>
+  <p>거래 후 평가는 받되 <strong>개별 점수와 평가 내용은 상대에게 공개하지 않습니다.</strong> 3단(좋았어요 / 보통 / 아쉬웠어요) + 선택형 사유 태그만 받고, 결과는 운영진 대시보드에만 집계됩니다. &lsquo;아쉬웠어요&rsquo;가 최근 10건 중 3건을 넘으면 운영진에게 알림이 가고, 공개 프로필에는 아무 변화가 없습니다. 칭찬 태그(&ldquo;시간 잘 지켜요&rdquo; 등)만 누적 3회 이상일 때 배지로 노출합니다. 부정은 비공개로 다루고 긍정만 공개하는 비대칭 구조입니다.</p>
+
+  <h3>안전거래존</h3>
+  <p>거래 장소를 자유 입력으로 두면 자취방·기숙사 방 안에서 만나는 일이 생깁니다. 장소는 <strong>등록된 안전거래존 중에서만 선택</strong>하게 하고, 예외는 &lsquo;차량 필요&rsquo; 부피 등급일 때만 허용합니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>거래존</th><th>운영 시간</th><th>특징</th><th>적합 품목</th></tr></thead>
+    <tbody>
+      <tr><td class="k">학생회관 1층 로비</td><td>07:00–23:00</td><td>CCTV, 상시 통행</td><td>기본값. 소형 전 품목</td></tr>
+      <tr><td class="k">중앙도서관 정문 앞</td><td>24시간</td><td>CCTV, 야간에도 인적 있음</td><td>교재·수험서</td></tr>
+      <tr><td class="k">기숙사 1층 라운지</td><td>06:00–24:00</td><td>사생 외 출입 제한 → 사생끼리만 선택 가능</td><td>침구·가전·주방</td></tr>
+      <tr><td class="k">본관 앞 광장</td><td>주간</td><td>개방 공간</td><td>부피 큰 물품</td></tr>
+      <tr><td class="k">후문 하차장</td><td>주간</td><td>차량 진입 가능</td><td>&lsquo;차량 필요&rsquo; 등급</td></tr>
+    </tbody>
+  </table></div>
+  <p class="lede" style="margin-top:-4px; font-size:14px;">실제 지점과 명칭·운영 시간은 학생지원팀 확인 후 확정합니다. 거래존은 관리자 콘솔에서 추가·비활성화할 수 있는 데이터로 관리합니다.</p>
+
+  <h3>금지 품목과 자동 차단</h3>
+  <p>등록 시 제목·본문을 키워드 사전으로 검사해 경고하고, 명백한 항목은 등록 자체를 막습니다. 교대 맥락에서 특히 중요한 것은 아래 세 번째 줄입니다.</p>
+  <ul>
+    <li>주류·담배·의약품·건강기능식품, 동물, 무기류 — 법령상 개인 간 거래 금지 또는 제한</li>
+    <li>대량 기프티콘·상품권, 계정·아이디, 대리 수강·과제 — 사기 및 학칙 위반</li>
+    <li><strong>임용 인강 계정 공유, 강의 교재 스캔본·PDF, 유료 문제집 복사본</strong> — 저작권 침해이자 학교가 운영 주체일 때 가장 위험한 항목. 별도 신고 버튼을 둡니다</li>
+    <li>기숙사 식권·학식 쿠폰 등 양도 금지 학내 재화 — 학칙 확인 후 반영</li>
+  </ul>
+
+  <h3>신고 처리 절차</h3>
+  <ol>
+    <li>사용자 신고 → 유형 선택(사기·노쇼 / 금지 품목 / 욕설·비방 / 개인정보 노출 / 기타) → 자동 접수 번호 발급</li>
+    <li>운영진 당번이 24시간 내 1차 검토. 명백한 경우 즉시 블라인드 처리</li>
+    <li>제재 3단계: 경고(기록만) → 기능 제한(등록·채팅 7~30일) → 이용 정지. 각 단계마다 사유를 본인에게 통지하고 이의신청 창구를 둡니다</li>
+    <li>금전 분쟁은 <strong>중재하지 않습니다.</strong> 플랫폼은 거래 당사자가 아님을 약관과 안내 화면에 명시하고, 대화·약속 기록 사본 제공까지만 지원합니다</li>
+    <li>학칙 위반 소지가 있는 사안은 학생지원팀으로 이관하는 경로를 사전에 합의해 둡니다</li>
+  </ol>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span>화면 설계</h2>
+  <p class="lede">하단 탭 4개로 고정합니다. 탭이 다섯 개를 넘으면 무엇이 주된 서비스인지 흐려집니다.</p>
+
+  <h4>정보 구조</h4>
+  <pre><code>홈          최근 등록 · 내 학년 추천 · 진행 중 약속 · 커뮤니티 인기글 3개
+장터        목록 / 검색 / 카테고리 / 등록 / 상세 / 찜 목록
+커뮤니티    게시판 목록 / 글 목록 / 글 상세 / 작성 / 스터디 모집
+채팅        방 목록 / 대화방(물품 카드 고정 · 약속 카드 · 이미지)
+마이(프로필) 내 판매·구매 내역 / 찜 / 작성글 / 인증 상태 / 알림 설정 / 신고 내역</code></pre>
+
+  <div class="frames">
+    <div class="phone">
+      <p class="cap">홈</p>
+      <div class="scr">
+        <div class="bar"><span>안뜰</span><em>경인교대 · 3학년</em></div>
+        <div class="body">
+          <div class="slot"><b>오늘 15:30 · 학생회관 로비</b>초등국어교육 교재 · 김OO님과 약속</div>
+          <div class="chips"><span class="chip on">내 학년</span><span class="chip">무료나눔</span><span class="chip">임용</span><span class="chip">실기</span></div>
+          <div class="row"><div class="thumb"></div><div class="t"><b>초등수학교육의 이해 3판</b><i>8,000원 · 필기 약간 · 2분 전</i></div></div>
+          <div class="row"><div class="thumb"></div><div class="t"><b>교생 정장 자켓 (55)</b><i>나눔 · 대여 가능 · 1시간 전</i></div></div>
+          <div class="row"><div class="thumb"></div><div class="t"><b>야마하 디지털피아노 P-45</b><i>180,000원 · 차량 필요</i></div></div>
+          <div class="slot"><b>분실물</b>도서관 3층에서 파란 텀블러 습득</div>
+        </div>
+        <div class="tabs"><span class="on">홈</span><span>장터</span><span>커뮤니티</span><span>채팅</span><span>마이</span></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <p class="cap">물품 등록</p>
+      <div class="scr">
+        <div class="bar"><span>← 등록</span><em>완료</em></div>
+        <div class="body">
+          <div class="chips"><span class="chip on">사진 4/10</span><span class="chip">＋</span></div>
+          <div class="slot"><b>카테고리</b>전공·교양 교재 › 교과교육</div>
+          <div class="slot"><b>과목 코드</b>EDU2031 초등수학교육 <br>판본 2023년 3판 · 필기 약간</div>
+          <div class="slot"><b>가격</b>8,000원 &nbsp;|&nbsp; ☐ 무료나눔</div>
+          <div class="slot"><b>거래 장소</b>중앙도서관 정문 앞 (기본값)</div>
+          <div class="slot" style="border-style:solid; border-color:var(--primary)"><b>부피</b>혼자 들 수 있음</div>
+        </div>
+        <div class="tabs"><span>홈</span><span class="on">장터</span><span>커뮤니티</span><span>채팅</span><span>마이</span></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <p class="cap">채팅 · 약속 카드</p>
+      <div class="scr">
+        <div class="bar"><span>← 김OO · 국어교육 22</span><em>예약중</em></div>
+        <div class="body">
+          <div class="row"><div class="thumb"></div><div class="t"><b>초등수학교육의 이해 3판</b><i>8,000원 · 예약중</i></div></div>
+          <div class="bubble them">아직 있나요?</div>
+          <div class="bubble me">네 있습니다. 내일 오후 괜찮으세요?</div>
+          <div class="slot" style="border-style:solid; border-color:var(--primary)"><b>약속 제안</b>9월 3일(수) 15:30<br>중앙도서관 정문 앞<br><span style="color:var(--primary);font-weight:500">수락함 · 30분 전 알림</span></div>
+          <div class="bubble them">좋아요, 그때 뵐게요</div>
+        </div>
+        <div class="tabs"><span>홈</span><span>장터</span><span>커뮤니티</span><span class="on">채팅</span><span>마이</span></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <p class="cap">커뮤니티</p>
+      <div class="scr">
+        <div class="bar"><span>커뮤니티</span><em>글쓰기</em></div>
+        <div class="body">
+          <div class="chips"><span class="chip on">전체</span><span class="chip">질문</span><span class="chip">스터디</span><span class="chip">분실물</span><span class="chip">실습</span></div>
+          <div class="slot"><b>2027 임용 초등 스터디 모집 (4/6)</b>수학·과학 중심 · 화목 19시 · 도서관 스터디룸<br><span style="color:var(--muted)">수학교육 21 · 댓글 7</span></div>
+          <div class="slot"><b>교생실습 배정 학교 후기 모음</b><span style="color:var(--muted)">학번만 공개 · 좋아요 42 · 댓글 18</span></div>
+          <div class="slot"><b>[습득] 도서관 3층 파란 텀블러</b>행정실 보관 중<br><span style="color:var(--muted)">영어교육 24 · 3시간 전</span></div>
+          <div class="slot"><b>단소 실기 시험 준비 팁 있을까요</b><span style="color:var(--muted)">닉네임 · 댓글 11</span></div>
+        </div>
+        <div class="tabs"><span>홈</span><span>장터</span><span class="on">커뮤니티</span><span>채팅</span><span>마이</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>빈 상태 설계</h3>
+  <p>초기 몇 달간 사용자가 가장 자주 보게 될 화면은 빈 목록입니다. 이 화면을 방치하면 재방문이 끊깁니다. 빈 상태마다 <em>지금 할 수 있는 행동</em>을 한 개씩 제시합니다.</p>
+  <ul>
+    <li><strong>장터가 비었을 때</strong> — &ldquo;아직 등록된 물건이 없어요. 안 쓰는 교재부터 올려 보세요&rdquo; + 등록 버튼 + 최근 검색어 목록(수요가 있음을 보여 줌)</li>
+    <li><strong>검색 결과가 없을 때</strong> — &ldquo;키워드 알림&rdquo; 등록 유도. 나중에 올라오면 푸시로 되돌아올 이유를 만듭니다</li>
+    <li><strong>채팅이 없을 때</strong> — 최근 찜한 물건 바로가기</li>
+    <li><strong>커뮤니티가 조용할 때</strong> — 게시판별 마중물 질문을 운영진이 주 2회 올립니다(11절)</li>
+  </ul>
+
+  <h3>접근성과 기본 원칙</h3>
+  <ul>
+    <li>본문 최소 15px, 명도 대비 4.5:1 이상. 시스템 글꼴 크기 설정을 따릅니다</li>
+    <li>가격·상태 같은 핵심 정보를 색으로만 전달하지 않습니다(예약중은 색 + 라벨)</li>
+    <li>사진 업로드 시 대체 텍스트를 선택 입력으로 받고, 없으면 카테고리·제목으로 대체합니다</li>
+    <li>모든 파괴적 동작(삭제·정지)은 확인 단계를 둡니다</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span>데이터 모델</h2>
+  <p class="lede">PostgreSQL 기준. 핵심 테이블 여덟 개와, 이 서비스에서 실제로 문제가 되는 인덱스·정책만 적습니다.</p>
+
+  <div class="tbl"><table>
+    <thead><tr><th>테이블</th><th>역할</th><th>주요 컬럼</th></tr></thead>
+    <tbody>
+      <tr><td class="k">profiles</td><td>계정. auth 사용자와 1:1</td><td>id, nickname, dept, admission_year, role(student·staff·alumni·admin), status, verified_at, completed_deals, share_count, avg_response_sec, appointment_kept_rate</td></tr>
+      <tr><td class="k">verifications</td><td>학교 이메일 인증 시도 기록</td><td>id, profile_id, email_hash, code_hash, expires_at, consumed_at, ip, attempt_count</td></tr>
+      <tr><td class="k">items</td><td>판매·나눔 물품</td><td>id, seller_id, category_id, title, body, price, kind(sale·free·exchange·rent), status(on_sale·reserved·done·hidden), bulk_grade, zone_id, attrs(jsonb), search_tsv, bumped_at</td></tr>
+      <tr><td class="k">item_images</td><td>사진</td><td>id, item_id, path, sort_order, width, height</td></tr>
+      <tr><td class="k">chat_rooms / messages</td><td>1:1 대화</td><td>room: item_id, buyer_id, seller_id, last_message_at / message: room_id, sender_id, type(text·image·appointment), body, read_at</td></tr>
+      <tr><td class="k">appointments</td><td>약속 카드</td><td>id, room_id, item_id, zone_id, meet_at, state(proposed·accepted·done·noshow·cancelled), confirmed_by_buyer, confirmed_by_seller</td></tr>
+      <tr><td class="k">deal_reviews</td><td>비공개 상호 평가</td><td>id, appointment_id, rater_id, ratee_id, rating(1~3), tags(text[]) — <em>ratee에게 노출되지 않음</em></td></tr>
+      <tr><td class="k">posts / comments</td><td>커뮤니티</td><td>post: board_id, author_id, title, body, display_mode(named·dept·anon), like_count, blinded_at</td></tr>
+      <tr><td class="k">reports / blocks</td><td>신고와 차단</td><td>report: target_type, target_id, reporter_id, reason, state, handled_by, handled_at</td></tr>
+      <tr><td class="k">audit_logs</td><td>관리자 행위 기록</td><td>actor_id, action, target, reason, created_at — 익명글 작성자 조회는 반드시 여기 남습니다</td></tr>
+      <tr><td class="k">safe_zones</td><td>안전거래존</td><td>id, name, open_from, open_to, lat, lng, restricted_to(dorm 등), active</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>핵심 DDL 발췌</h4>
+  <pre><code>create type item_status as enum ('on_sale','reserved','done','hidden');
+create type item_kind   as enum ('sale','free','exchange','rent');
+
+create table items (
+  id           uuid primary key default gen_random_uuid(),
+  seller_id    uuid not null references profiles(id) on delete cascade,
+  category_id  int  not null references categories(id),
+  title        text not null check (char_length(title) between 2 and 60),
+  body         text not null default '',
+  price        int  not null default 0 check (price between 0 and 5000000),
+  kind         item_kind   not null default 'sale',
+  status       item_status not null default 'on_sale',
+  bulk_grade   smallint not null default 1,   -- 1 혼자 2 둘이 3 차량필요
+  zone_id      int references safe_zones(id),
+  attrs        jsonb not null default '{}',   -- 과목코드·판본·사이즈 등 카테고리별 항목
+  view_count   int  not null default 0,
+  bumped_at    timestamptz not null default now(),
+  created_at   timestamptz not null default now()
+);
+
+-- 목록의 기본 정렬은 끌어올림 시각. 판매중만 부분 인덱스로 좁힘
+create index items_feed_idx on items (bumped_at desc)
+  where status in ('on_sale','reserved');
+create index items_cat_idx  on items (category_id, bumped_at desc)
+  where status = 'on_sale';
+-- jsonb 속성 검색(과목코드 등)
+create index items_attrs_idx on items using gin (attrs jsonb_path_ops);</code></pre>
+
+  <div class="note info">
+    <b>한국어 검색은 여기서 갈립니다</b>
+    <p>PostgreSQL의 기본 전문 검색에는 한국어 형태소 분석기가 없습니다. <code>to_tsvector('simple', ...)</code>로는 &ldquo;초등수학교육&rdquo;을 검색해도 &ldquo;초등 수학 교육의 이해&rdquo;가 걸리지 않습니다. 데이터 규모가 작으므로(연 수천 건) <strong>pg_bigm 확장 + GIN 인덱스</strong>로 2-gram 부분 일치를 쓰는 것이 가장 비용이 낮고 정확합니다. 확장 설치가 불가한 환경이면 <code>pg_trgm</code>이 차선이지만 한글에서는 정확도가 떨어집니다. 어느 쪽도 안 되면 제목·본문·과목코드를 이어 붙인 <code>search_text</code> 컬럼에 <code>ILIKE '%키워드%'</code>를 쓰고, 수만 건을 넘어서면 그때 전용 검색 엔진을 검토합니다. 처음부터 Elasticsearch를 얹는 것은 이 규모에서 명백한 과잉입니다.</p>
+  </div>
+
+  <h4>행 수준 보안(RLS) 예시</h4>
+  <p>백엔드 서버 없이 클라이언트가 DB에 직접 접근하는 구조를 택했으므로, 권한은 전부 DB 정책으로 강제됩니다. 이 정책이 곧 보안 경계입니다.</p>
+  <pre><code>alter table items enable row level security;
+
+-- 읽기: 인증 완료된 구성원만. 숨김 처리된 글은 작성자와 관리자만
+create policy items_read on items for select
+  using (
+    exists (select 1 from profiles p
+            where p.id = auth.uid()
+              and p.verified_at is not null
+              and p.status = 'active')
+    and (status &lt;&gt; 'hidden' or seller_id = auth.uid() or is_admin())
+  );
+
+-- 쓰기: 본인 글만. 제재 중인 계정은 등록 불가
+create policy items_write on items for insert
+  with check (seller_id = auth.uid() and not is_restricted(auth.uid()));
+
+-- 평가는 평가자만 읽을 수 있음. 피평가자는 자기 평가를 볼 수 없음
+create policy reviews_read on deal_reviews for select
+  using (rater_id = auth.uid() or is_admin());</code></pre>
+  <p>메시지 테이블에는 <code>room_id</code>를 통한 참여자 확인 정책을 걸고, 관리자 조회는 별도 서버 함수를 거쳐 <code>audit_logs</code>에 기록이 남게 합니다. 관리자 키(service role)는 클라이언트 앱에 절대 포함하지 않으며, 관리자 콘솔은 별도 웹으로 분리합니다.</p>
+
+  <h4>보관과 파기</h4>
+  <div class="tbl"><table>
+    <thead><tr><th>데이터</th><th>보관</th><th>근거</th></tr></thead>
+    <tbody>
+      <tr><td class="k">채팅 메시지</td><td>거래 완료 후 1년, 이후 자동 삭제</td><td>분쟁 대응에 필요한 최소 기간</td></tr>
+      <tr><td class="k">거래·약속 기록</td><td>3년(통계는 익명 집계로 별도 보존)</td><td>재발 이용자 판별</td></tr>
+      <tr><td class="k">신고·제재 기록</td><td>3년</td><td>제재의 형평성 근거</td></tr>
+      <tr><td class="k">탈퇴 계정</td><td>즉시 익명화, 30일 후 완전 삭제</td><td>작성 글은 &lsquo;탈퇴한 사용자&rsquo;로 유지 또는 삭제 선택</td></tr>
+      <tr><td class="k">인증 이메일·코드</td><td>인증 완료 즉시 원문 폐기, 해시만 90일</td><td>최소 수집 원칙</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span>기술 아키텍처</h2>
+  <p class="lede">판단 기준은 성능이 아닙니다. 이 규모에서는 무엇을 써도 빠릅니다. 기준은 <strong>만든 학생이 졸업한 뒤에도 서비스가 살아 있는가</strong>입니다.</p>
+
+  <h3>스택 비교</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>항목</th><th>Supabase</th><th>Firebase</th><th>직접 구축(NestJS + RDS)</th></tr></thead>
+    <tbody>
+      <tr><td class="k">MVP 개발 속도</td><td>빠름 — 인증·저장소·실시간 내장</td><td>가장 빠름</td><td>느림 — 서버·배포·인증 전부 직접</td></tr>
+      <tr><td class="k">데이터 모델</td><td>PostgreSQL. 카테고리·거래·통계 질의에 적합</td><td>문서 DB. 복잡한 조인·집계에 불리</td><td>PostgreSQL</td></tr>
+      <tr><td class="k">한국어 검색</td><td>pg_bigm 확장 가능</td><td>사실상 불가 → 외부 검색 필요</td><td>자유</td></tr>
+      <tr><td class="k">실시간 채팅</td><td>Realtime 내장</td><td>강점</td><td>WebSocket 직접 구현</td></tr>
+      <tr><td class="k">국내 리전</td><td>ap-northeast-2(서울)</td><td>asia-northeast3(서울)</td><td>선택 자유(NCP·KT 등 국내 사업자 가능)</td></tr>
+      <tr><td class="k">운영 부담</td><td>낮음 — 서버 관리 없음</td><td>낮음</td><td>높음 — 담당자가 졸업하면 위험</td></tr>
+      <tr><td class="k">이탈 비용</td><td>낮음 — 표준 PostgreSQL 덤프</td><td>높음 — 독자 모델</td><td>없음</td></tr>
+      <tr><td class="k">2,300명 규모 월 비용</td><td>0~$25</td><td>0~소액</td><td>서버·DB 최소 월 3~6만 원</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <b>권장</b>
+    <p><strong>Flutter + Supabase(서울 리전)</strong>. PostgreSQL이라 데이터가 어디에도 갇히지 않고, 서버 운영 인력이 필요 없으며, 나중에 학교 인프라로 옮길 때 표준 덤프로 이관됩니다. 개인정보를 국내에 두어야 한다는 요건도 서울 리전으로 충족합니다. 앱은 iOS·안드로이드를 한 코드베이스로 내야 하므로 Flutter, 관리자 콘솔만 웹(Next.js 또는 Flutter Web)으로 별도 배포합니다.</p>
+  </div>
+
+  <h3>구성</h3>
+  <pre><code>[Flutter 앱]  iOS / Android
+     |  Supabase Dart SDK (JWT, RLS 적용)
+     v
+[Supabase · ap-northeast-2]
+     Auth        학교 이메일 OTP · 세션 · 기기 바인딩
+     PostgreSQL  RLS 정책이 곧 권한 경계 · pg_bigm 검색
+     Storage     원본 + 리사이즈 파생본(썸네일 320 / 목록 640 / 상세 1280)
+     Realtime    채팅 메시지 · 읽음 표시
+     Edge Fn     푸시 발송 · 인증 메일 발송 · 금지어 검사 · 통계 배치
+
+[부가]
+     FCM         푸시 알림
+     메일 발송   학교 SMTP 또는 Resend·SES
+     Sentry      오류 수집(무료)
+     GitHub Actions  CI · 스토어 배포</code></pre>
+
+  <h3>결정해 둘 것들</h3>
+  <ul>
+    <li><strong>이미지 용량이 사실상 유일한 비용 변수입니다.</strong> 업로드 전 클라이언트에서 긴 변 1600px, WebP 85%로 리사이즈합니다. 원본을 그대로 올리면 저장소 비용이 20배가 됩니다.</li>
+    <li><strong>푸시는 처음부터 넣습니다.</strong> 거래 앱에서 채팅 알림이 없으면 응답 시간이 무너지고, 응답 시간이 무너지면 거래가 성사되지 않습니다. 알림 종류별 on/off를 마이 화면에 둡니다.</li>
+    <li><strong>스토어 심사를 일정에 반영합니다.</strong> 사용자 생성 콘텐츠가 있는 앱은 애플 심사에서 신고·차단·차단된 사용자 관리 기능을 요구합니다(App Store Review Guideline 1.2). MVP에 신고·차단이 M 우선순위인 이유입니다. 첫 심사는 반려를 전제로 2주를 잡습니다.</li>
+    <li><strong>웹 버전을 함께 낼지</strong>는 관리자 콘솔만 웹으로 하고 사용자용은 앱 전용으로 시작하기를 권합니다. 푸시와 카메라가 핵심이고, 인력이 분산되면 둘 다 어설퍼집니다.</li>
+    <li><strong>인수인계 문서를 코드와 같은 저장소에</strong> 둡니다. 배포 절차, 스토어 계정 소유자, 비밀 키 보관 위치, 장애 시 연락처. 이 서비스의 최대 장애 원인은 버그가 아니라 담당자 졸업입니다.</li>
+  </ul>
+</section>
+
+<section id="s9">
+  <h2><span class="n">09</span>구성원 인증</h2>
+  <p class="lede">안뜰의 모든 신뢰가 이 단계 하나에 걸려 있습니다. 여기가 뚫리면 그냥 작은 당근이 됩니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>방식</th><th>구현</th><th>신뢰도</th><th>학교 협조</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td class="k">A. 학교 이메일 OTP</td><td>@ginue.ac.kr 주소로 6자리 코드 발송</td><td>중상 — 계정 보유 = 구성원</td><td>불필요</td><td><strong>MVP 채택</strong></td></tr>
+      <tr><td class="k">B. 학교 SSO / LDAP 연동</td><td>학사시스템 계정으로 로그인, 소속·학년 자동 취득</td><td>높음</td><td>필수(정보전산팀 심의)</td><td>정식 출시 목표</td></tr>
+      <tr><td class="k">C. 학생증·재학증명서 심사</td><td>사진 제출 후 운영진 수동 확인</td><td>높음</td><td>불필요</td><td>비권장 — 민감정보를 직접 보관하게 됨</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>A로 시작해 B를 목표로 합니다.</strong> C는 신분증 이미지라는 가장 민감한 데이터를 떠안게 되므로, 예외 승인(교환학생·계약직 등)에서만 <em>확인 후 즉시 파기</em> 조건으로 씁니다.</p>
+
+  <h4>A안의 구멍과 막는 법</h4>
+  <ul>
+    <li><strong>졸업생 계정 잔존</strong> — 많은 대학이 졸업 후에도 메일 계정을 유지시킵니다. 매 학기 초 재인증을 요구하고, 재인증에 실패하면 &lsquo;졸업생&rsquo; 상태로 자동 전환해 <em>구매·나눔 수령만 가능하고 판매·커뮤니티 작성은 막습니다.</em> 유예 6개월.</li>
+    <li><strong>계정 대여</strong> — 한 사람이 여러 기기에서 로그인해 대리 거래를 하는 경우. 기기 지문을 세션에 묶어 동시 활성 기기를 2대로 제한하고, 새 기기 로그인 시 재인증합니다.</li>
+    <li><strong>이메일 별칭·전달</strong> — 점 표기나 플러스 별칭으로 한 계정에서 여러 가입. 이메일을 정규화(소문자·점 제거·플러스 이후 절단)한 뒤 해시해 유일 제약을 겁니다.</li>
+    <li><strong>무차별 코드 시도</strong> — 코드 6자리, 유효 10분, 5회 실패 시 30분 잠금, 동일 IP 시간당 발송 10회 제한.</li>
+    <li><strong>소속·학년의 정확성</strong> — A안에서는 학과·입학년도를 본인이 입력하므로 틀릴 수 있습니다. 프로필에 &ldquo;본인 입력&rdquo; 표시를 하고, B안 연동 후 &ldquo;학교 확인됨&rdquo; 배지로 승격합니다.</li>
+  </ul>
+  <div class="note warn">
+    <b>수집하지 말아야 할 것</b>
+    <p>이름, 학번, 생년월일, 연락처는 <strong>저장하지 않습니다.</strong> 안뜰이 필요로 하는 것은 &lsquo;이 사람이 우리 학교 구성원인가&rsquo; 하나뿐이고, 그것은 이메일 해시로 충분합니다. 개인정보를 적게 가질수록 사고 시 피해와 법적 의무가 함께 줄어듭니다. 학번을 화면에 표시할 때도 <code>수학교육 22</code>처럼 학과와 입학년도만 씁니다.</p>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span>법·학내 규정</h2>
+  <p class="lede">실제로 운영한다는 전제에서 가장 자주 빠뜨리는 절입니다. 아래는 법률 자문이 아니라, 산학협력단·법무 담당·정보보호 담당에게 물어야 할 항목의 목록입니다.</p>
+
+  <h3>먼저 정해야 할 단 하나</h3>
+  <div class="note warn">
+    <b>운영 주체가 학교인가, 학생 단체인가</b>
+    <p>이 답에 따라 아래 모든 항목의 결론이 달라집니다. <strong>학교 명의</strong>로 운영하면 국립대는 공공기관이므로 개인정보 보호 의무 수준이 높아지고 정보보안 심의·서비스 등록 절차를 거쳐야 하지만, 대신 학교 도메인·SSO·예산·지속성을 얻습니다. <strong>학생 단체 명의</strong>는 절차가 가볍지만 운영 책임이 개인에게 귀속되고, 학교 이메일 인증을 쓰는 순간 학교와 무관하다고 보기 어려워집니다. 권장은 <em>학생 단체가 만들고 학교(학생지원팀 또는 산학협력단)가 운영 주체로 승인·후원하는 형태</em>이며, 이 합의를 개발 착수 전에 문서로 남기는 것입니다.</p>
+  </div>
+
+  <h3>확인 항목</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>영역</th><th>쟁점</th><th>대응 방향</th></tr></thead>
+    <tbody>
+      <tr><td class="k">전자상거래법</td><td>개인 간 거래 게시판이 &lsquo;통신판매중개&rsquo;에 해당하는지, 해당하면 신고 의무가 있는지</td><td>결제를 중개하지 않고 수수료·광고 수익이 없다면 부담이 크게 낮아집니다. 다만 해당 여부 자체는 법무 확인 필요. 화면과 약관에 <strong>&ldquo;안뜰은 거래 당사자가 아니며 거래에 대한 책임을 지지 않습니다&rdquo;</strong>를 상시 고지</td></tr>
+      <tr><td class="k">전자금융거래법</td><td>에스크로·간편결제 도입 시 PG 계약과 등록 의무 발생</td><td><strong>MVP에서 결제를 넣지 않는 결정적 이유.</strong> 대면 현금·계좌이체만 지원하고 앱은 관여하지 않습니다</td></tr>
+      <tr><td class="k">개인정보 보호법</td><td>수집 항목·근거·보유기간, 처리방침 게시, 위탁(클라우드) 고지, 국외 이전 여부, 파기</td><td>수집을 이메일 해시·닉네임·소속·학년으로 최소화. 서울 리전 사용으로 국외 이전 회피. 처리방침·동의 화면을 가입 흐름에 배치. 국립대의 <em>개인정보 영향평가</em> 대상 여부는 규모 기준으로 확인 필요</td></tr>
+      <tr><td class="k">정보통신망법</td><td>명예훼손 게시물에 대한 임시조치(요청 시 최장 30일 접근 차단) 의무, 게시판 운영자 책임</td><td>신고 → 블라인드 → 이의신청 절차를 제품 기능으로 구현(5절). 처리 이력 보관</td></tr>
+      <tr><td class="k">저작권법</td><td>교재 스캔본·인강 자료·문제집 복사본 거래</td><td>금지 품목 명시, 등록 시 키워드 경고, 전용 신고 사유. 반복 시 계정 정지</td></tr>
+      <tr><td class="k">학칙·내규</td><td>교내 상행위 허용 범위, 학교 명칭·엠블럼 사용, 학내 홍보물 게시</td><td>학생지원팀 사전 협의. 안전거래존으로 지정할 공간의 사용 승인 포함</td></tr>
+      <tr><td class="k">앱 마켓 정책</td><td>UGC 앱의 신고·차단·모더레이션 요구, 연령 등급</td><td>신고·차단·이용약관 동의를 MVP 필수로. 연령 등급은 사용자 소통 기능으로 인해 상향 지정</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>반드시 준비할 문서 네 가지</h3>
+  <ol>
+    <li><strong>이용약관</strong> — 중개자 지위, 금지 행위, 제재 기준, 면책, 분쟁 관할</li>
+    <li><strong>개인정보 처리방침</strong> — 항목·목적·보유기간·위탁(Supabase 등)·파기·정보주체 권리·책임자 연락처</li>
+    <li><strong>커뮤니티 운영 규정</strong> — 게시판별 규칙, 블라인드 기준, 이의신청 절차. 공개해야 제재가 정당성을 가집니다</li>
+    <li><strong>운영 인수인계서</strong> — 계정·키·배포 권한의 소유자와 승계 절차(8절)</li>
+  </ol>
+</section>
+
+<section id="s11">
+  <h2><span class="n">11</span>초기 확산 전략</h2>
+  <p class="lede">이 절이 이 문서에서 가장 중요합니다. 앱은 만들 수 있습니다. 어려운 것은 첫 300명입니다.</p>
+
+  <div class="note warn">
+    <b>정직하게 짚고 갈 것</b>
+    <p>구성원 2,300명 규모에서 중고 거래만으로는 <strong>하루 5~15건</strong>이 현실적인 상한입니다. 그 정도로는 앱을 매일 열 이유가 없고, 앱을 안 열면 매물도 안 올라와 거래량이 더 줄어드는 악순환이 생깁니다. 대부분의 교내 장터 앱이 여기서 죽습니다. 따라서 안뜰은 <em>거래 앱에 커뮤니티를 곁들이는</em> 것이 아니라, <strong>매일 열 이유(커뮤니티·분실물)를 먼저 만들고 거래를 그 위에 얹는</strong> 순서로 가야 합니다.</p>
+  </div>
+
+  <h3>순서</h3>
+  <ol>
+    <li><strong>분실물부터 엽니다.</strong> 만들기 쉽고, 수요가 확실하며, 학교 규모와 무관하게 매주 발생합니다. 행정실·도서관·학생회관 습득물을 운영진이 대신 올려 주면 첫 주부터 콘텐츠가 있습니다. &ldquo;안뜰 = 잃어버린 거 찾는 앱&rdquo;으로 먼저 각인시킵니다.</li>
+    <li><strong>커뮤니티 두 개만 활성화합니다.</strong> 수업·과제 질문, 스터디 모집. 운영진이 주 2회 마중물 글을 올리고, 답이 없는 질문에는 24시간 안에 반드시 답을 답니다.</li>
+    <li><strong>거래는 시즌에 맞춰 붙입니다.</strong> 아래 캘린더의 진한 달에 맞춰 정식 오픈합니다. 3월 개강 첫 주 또는 12월 졸업 시즌 중 하나를 D-day로 잡습니다.</li>
+    <li><strong>물려주기로 공급을 한 번에 만듭니다.</strong> 졸업 예정자에게 &ldquo;버릴 것 말고 물려줄 것&rdquo; 캠페인. 졸업생 한 명이 평균 10~20개를 내놓으면 100명만 참여해도 매물 1,500건이 생깁니다. <em>수요가 아니라 공급을 먼저 채우는 것이 마켓플레이스 콜드스타트의 정석입니다.</em></li>
+  </ol>
+
+  <h3>학사 일정에 맞춘 운영 리듬</h3>
+  <div class="cal">
+    <div class="mo peak"><b>3월</b><span>개강 · 교재 수요 폭증 · 신입생 온보딩</span></div>
+    <div class="mo"><b>4월</b><span>동아리·행사 게시판</span></div>
+    <div class="mo"><b>5월</b><span>축제 · 티켓·굿즈</span></div>
+    <div class="mo peak"><b>6월</b><span>종강 · 교재 처분 대량 등록</span></div>
+    <div class="mo"><b>7월</b><span>방학 · 임용 스터디 모집</span></div>
+    <div class="mo"><b>8월</b><span>기숙사 이동 · 살림 정리</span></div>
+    <div class="mo peak"><b>9월</b><span>교생실습 · 정장·교구 대여</span></div>
+    <div class="mo"><b>10월</b><span>중간 · 조용한 달</span></div>
+    <div class="mo peak"><b>11월</b><span>임용 직전 · 수험서 순환</span></div>
+    <div class="mo peak"><b>12월</b><span>졸업 시즌 · 물려주기 캠페인</span></div>
+    <div class="mo"><b>1월</b><span>자취방 정리 · 가전·가구</span></div>
+    <div class="mo peak"><b>2월</b><span>신입생 예비대학 · 사전 가입</span></div>
+  </div>
+  <p style="font-size:14px; color:var(--ink2)">진한 달이 거래량 스파이크입니다. 기능 출시와 마케팅 예산을 이 여섯 달에 집중시키고, 조용한 달에는 개선과 정리를 합니다.</p>
+
+  <h3>오프라인 훅</h3>
+  <ul>
+    <li><strong>학생회관 나눔 선반</strong> — 무인 선반에 QR을 붙여, 물건을 놓으면서 앱에 등록하고 가져가면서 완료 처리. 앱을 설치할 가장 구체적인 이유를 만듭니다</li>
+    <li><strong>학과 학생회·기숙사 자치회 파트너십</strong> — 학과별 초기 홍보 담당 1인, 가입률 경쟁</li>
+    <li><strong>예비대학·오리엔테이션 배포</strong> — 신입생은 2월에 100% 도달 가능한 유일한 집단입니다</li>
+    <li><strong>안전거래존 안내 스티커</strong> — 실제 공간에 표식이 있으면 서비스가 &lsquo;학교 공인&rsquo;처럼 인식됩니다</li>
+  </ul>
+
+  <h3>운영 조직</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>역할</th><th>인원</th><th>주간 투입</th><th>일</th></tr></thead>
+    <tbody>
+      <tr><td class="k">총괄(교수 또는 직원)</td><td>1</td><td>1시간</td><td>학교 협의, 정책 결정, 지속성 담보</td></tr>
+      <tr><td class="k">운영진(학생)</td><td>3~4</td><td>각 2~3시간</td><td>신고 처리 당번(요일 배분), 마중물 글, 분실물 등록</td></tr>
+      <tr><td class="k">개발 담당</td><td>1~2</td><td>4시간</td><td>배포, 오류 대응, 개선</td></tr>
+    </tbody>
+  </table></div>
+  <p>운영진은 <strong>매년 3월에 절반이 교체된다고 전제하고</strong> 설계합니다. 신고 처리 기준, 마중물 글 템플릿, 블라인드 판단 사례집을 문서로 남겨 두면 인수인계가 하루면 끝납니다.</p>
+</section>
+
+<section id="s12">
+  <h2><span class="n">12</span>로드맵과 공수</h2>
+  <p class="lede">2~4인 팀, 주 20~25시간 투입 기준. 학기 중이라면 각 구간을 1.5배로 늘려 잡습니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>단계</th><th>기간</th><th>산출물</th><th>완료 기준</th></tr></thead>
+    <tbody>
+      <tr><td class="k">0 · 합의</td><td class="num">3주</td><td>운영 주체 합의서, 학교 협의(안전거래존·이메일 인증), 약관·처리방침 초안, 디자인 시스템</td><td>학교로부터 서면 회신 확보</td></tr>
+      <tr><td class="k">1 · MVP</td><td class="num">10주</td><td>인증, 물품 등록·목록·검색, 채팅, 약속 카드, 게시판 3종, 분실물, 신고·차단, 관리자 콘솔 v1</td><td>내부 30명 베타에서 실제 거래 20건 성사</td></tr>
+      <tr><td class="k">2 · 출시</td><td class="num">4주</td><td>스토어 등록·심사, 온보딩 개선, 푸시 알림 정비, 운영 문서화</td><td>양대 스토어 승인, 분실물 게시판 상시 운영</td></tr>
+      <tr><td class="k">3 · 확산</td><td class="num">8주</td><td>물려주기, 스터디 매칭, 키워드 알림, 교재 자동 매칭, 통계 대시보드</td><td>가입률 40%, 주간 거래 20건</td></tr>
+      <tr><td class="k">4 · 정착</td><td class="num">이후</td><td>학교 SSO 연동, 교생실습 정보, 나눔 선반 연계, 차기 운영진 인계</td><td>담당자 교체 후에도 2개월 무중단 운영</td></tr>
+    </tbody>
+  </table></div>
+  <h4>MVP 10주 주차별</h4>
+  <div class="tbl"><table>
+    <thead><tr><th>주차</th><th>작업</th></tr></thead>
+    <tbody>
+      <tr><td class="k num">1–2</td><td>DB 스키마·RLS 정책 확정, 인증(이메일 OTP), 프로필, 앱 뼈대와 네비게이션</td></tr>
+      <tr><td class="k num">3–4</td><td>물품 등록(사진 업로드·리사이즈·카테고리별 동적 폼), 목록·상세</td></tr>
+      <tr><td class="k num">5–6</td><td>검색(pg_bigm), 필터, 찜, 안전거래존, 홈 화면</td></tr>
+      <tr><td class="k num">7–8</td><td>채팅(Realtime), 약속 카드, 거래완료·평가, 푸시 알림</td></tr>
+      <tr><td class="k num">9</td><td>커뮤니티 게시판 3종, 분실물, 신고·차단</td></tr>
+      <tr><td class="k num">10</td><td>관리자 콘솔, 베타 배포, 버그 정리</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note info">
+    <b>가장 흔한 일정 붕괴 지점</b>
+    <p>채팅(7–8주차)입니다. 실시간 동기화, 읽음 표시, 알림, 이미지 전송, 오프라인 재접속 처리가 겹치면 예상의 두 배가 걸립니다. 여기서 밀리면 커뮤니티 게시판을 잘라내지 말고 <em>채팅의 이미지 전송과 읽음 표시를 잘라내십시오.</em> 텍스트만 오가도 거래는 성사됩니다.</p>
+  </div>
+</section>
+
+<section id="s13">
+  <h2><span class="n">13</span>비용</h2>
+  <p class="lede">인건비를 제외한 실제 지출입니다. 이 규모에서 클라우드 비용은 사실상 문제가 되지 않습니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>항목</th><th>개발기</th><th>운영기 (월)</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Supabase</td><td class="num">0원</td><td class="num">0 ~ 3.5만 원</td><td>무료 티어로 2,300명 규모를 감당할 수 있으나, 자동 백업과 지원이 필요하면 Pro($25)</td></tr>
+      <tr><td class="k">이미지 저장소</td><td class="num">0원</td><td class="num">포함</td><td>리사이즈 적용 시 연간 수십 GB 수준</td></tr>
+      <tr><td class="k">푸시(FCM)</td><td class="num">0원</td><td class="num">0원</td><td>무료</td></tr>
+      <tr><td class="k">메일 발송</td><td class="num">0원</td><td class="num">0 ~ 1.5만 원</td><td>학교 SMTP 사용 시 0원. 외부 서비스는 월 3,000통까지 무료 구간이 일반적</td></tr>
+      <tr><td class="k">도메인</td><td class="num">—</td><td class="num">약 1,500원</td><td>연 1.5~2만 원</td></tr>
+      <tr><td class="k">Apple Developer</td><td class="num">—</td><td class="num">약 1.1만 원</td><td>연 $99. <strong>학교 명의 조직 계정 권장</strong> — 개인 계정이면 졸업 시 앱이 사라집니다</td></tr>
+      <tr><td class="k">Google Play</td><td class="num">약 3.5만 원</td><td class="num">0원</td><td>$25 1회</td></tr>
+      <tr><td class="k">오류 수집(Sentry)</td><td class="num">0원</td><td class="num">0원</td><td>무료 티어</td></tr>
+      <tr><td class="k">오프라인 홍보물</td><td class="num">—</td><td class="num">—</td><td>스티커·포스터·나눔 선반 초기 20~50만 원</td></tr>
+      <tr><td class="k"><strong>합계</strong></td><td class="num"><strong>약 4만 원</strong></td><td class="num"><strong>월 1.3 ~ 6만 원</strong></td><td>초기 홍보비 별도</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <b>돈보다 중요한 계정 소유권</b>
+    <p>Apple·Google·Supabase·도메인 계정을 <strong>학교 조직 명의 또는 공용 계정</strong>으로 개설하십시오. 학생 개인 계정으로 만든 앱은 그 학생이 졸업하면 갱신·업데이트가 불가능해지고, 스토어에서 내려갑니다. 실제로 교내 앱이 사라지는 가장 흔한 이유입니다.</p>
+  </div>
+</section>
+
+<section id="s14">
+  <h2><span class="n">14</span>성공 지표</h2>
+  <p class="lede">북극성 지표는 <strong>주간 성사 거래·나눔 건수</strong> 하나입니다. 가입자 수는 보기 좋을 뿐 아무것도 증명하지 않습니다.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>지표</th><th>정의</th><th>1학기 목표</th><th>왜 보는가</th></tr></thead>
+    <tbody>
+      <tr><td class="k">주간 성사 건수</td><td>양측 확인된 거래 + 나눔</td><td class="num">20건</td><td>북극성. 서비스가 실제로 작동하는지</td></tr>
+      <tr><td class="k">가입률</td><td>인증 완료 계정 ÷ 구성원</td><td class="num">40%</td><td>도달의 상한</td></tr>
+      <tr><td class="k">주간 활성 비율</td><td>WAU ÷ 가입자</td><td class="num">25%</td><td>매일 열 이유가 있는지</td></tr>
+      <tr><td class="k">등록 → 성사 전환율</td><td>7일 내 거래완료된 등록 비율</td><td class="num">45%</td><td>낮으면 수요 부족 또는 가격 문제</td></tr>
+      <tr><td class="k">첫 응답 시간</td><td>채팅 첫 메시지 → 답장 중앙값</td><td class="num">2시간 이내</td><td>거래 성사와 가장 상관이 큰 지표</td></tr>
+      <tr><td class="k">등록 소요 시간</td><td>등록 화면 진입 → 완료 중앙값</td><td class="num">3분 이내</td><td>공급이 끊기는 지점</td></tr>
+      <tr><td class="k">신고 처리 시간</td><td>접수 → 1차 조치 중앙값</td><td class="num">12시간 이내</td><td>커뮤니티 신뢰의 기반</td></tr>
+      <tr><td class="k">노쇼율</td><td>확정 약속 중 미완료 비율</td><td class="num">10% 이하</td><td>직거래의 최대 이탈 요인</td></tr>
+      <tr><td class="k">4주 잔존율</td><td>가입 4주 후 재방문</td><td class="num">35%</td><td>학기 단위 생존</td></tr>
+    </tbody>
+  </table></div>
+  <p>모든 지표는 개인 식별 없이 집계합니다. 관리자 대시보드에는 위 아홉 개만 띄우고, 주간 회의에서 <em>목표 대비 미달한 것 하나</em>만 골라 다음 주 작업으로 옮깁니다.</p>
+</section>
+
+<section id="s15">
+  <h2><span class="n">15</span>리스크</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>리스크</th><th>영향</th><th>가능성</th><th>대응</th></tr></thead>
+    <tbody>
+      <tr><td class="k">거래량 부족으로 사장</td><td>치명</td><td>높음</td><td>커뮤니티·분실물 선행, 물려주기로 공급 선점, 시즌 집중 출시(11절)</td></tr>
+      <tr><td class="k">에브리타임과의 중복</td><td>큼</td><td>높음</td><td>익명 잡담을 겨루지 않음. 신원 확인·검색·기록이 필요한 영역만 차지</td></tr>
+      <tr><td class="k">담당 학생 졸업으로 방치</td><td>치명</td><td>높음</td><td>서버리스 구조, 학교 명의 계정, 인수인계 문서, 총괄 교직원 1인 상시 배치</td></tr>
+      <tr><td class="k">개인정보 유출</td><td>치명</td><td>낮음</td><td>수집 최소화(이름·학번 미저장), RLS 강제, service role 키 앱 미포함, 관리자 조회 감사 로그</td></tr>
+      <tr><td class="k">학내 명예훼손·분쟁</td><td>큼</td><td>중간</td><td>익명 게시판 1개로 제한, 특정인 지칭 차단, 임시조치 절차 구현, 학생지원팀 이관 경로 합의</td></tr>
+      <tr><td class="k">거래 사기·노쇼</td><td>중간</td><td>중간</td><td>신원 확인이 이미 강한 억제력. 약속 카드·이행률·제재 3단계</td></tr>
+      <tr><td class="k">학교 승인 지연</td><td>큼</td><td>중간</td><td>Phase 0에서 승인 없이도 가능한 A안 인증으로 시작, 승인은 병행 추진</td></tr>
+      <tr><td class="k">스토어 심사 반려</td><td>중간</td><td>중간</td><td>신고·차단·약관을 MVP 필수로 포함, 첫 심사에 2주 버퍼</td></tr>
+      <tr><td class="k">저작권 침해물 유통</td><td>큼</td><td>중간</td><td>금지 품목 명시, 키워드 경고, 전용 신고, 반복 시 정지</td></tr>
+      <tr><td class="k">개강 시즌 트래픽 급증</td><td>낮음</td><td>중간</td><td>2,300명 규모에서는 무료 티어로도 여유. 이미지 리사이즈만 지키면 됨</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s16">
+  <h2><span class="n">16</span>확인이 필요한 것</h2>
+  <p class="lede">아래 다섯 개의 답에 따라 이 문서의 일부를 다시 씁니다. 순서대로 중요합니다.</p>
+  <ol>
+    <li><strong>운영 주체를 학교로 할 것인가, 학생 단체로 할 것인가.</strong> 10절 전체와 13절의 계정 소유권, 9절의 SSO 가능 여부가 여기에 달려 있습니다.</li>
+    <li><strong>개발 주체와 기간.</strong> 캡스톤 수업(한 학기)인지, 연구실 과제(1~2년)인지, 외주인지에 따라 12절 로드맵의 현실성이 달라집니다. 한 학기짜리라면 MVP 범위를 더 잘라야 합니다.</li>
+    <li><strong>대상 범위.</strong> 한 학교 전용인지, 전국 10개 교대 연합인지. 연합이면 규모 문제(11절)는 풀리지만 &lsquo;캠퍼스 안 직거래&rsquo;라는 핵심 전제가 무너져 완전히 다른 제품이 됩니다.</li>
+    <li><strong>앱 우선인가 웹 우선인가.</strong> 이 문서는 앱 우선으로 썼습니다. 인력이 2인 이하라면 반응형 웹으로 시작하고 푸시를 포기하는 선택도 가능합니다.</li>
+    <li><strong>익명 게시판을 열 것인가.</strong> 4절 말미의 판단을 학교·학생회와 사전에 합의해 두는 편이 안전합니다.</li>
+  </ol>
+  <div class="note info">
+    <b>다음 단계 제안</b>
+    <p>1번과 2번의 답이 나오면, 이 설계서를 기준으로 ① 화면 흐름 프로토타입(주요 12화면), ② DB 스키마 전체 DDL과 RLS 정책 세트, ③ MVP 백로그(이슈 단위로 분해한 60~80개 항목) 순으로 만들 수 있습니다. 어느 것부터 필요하신지 알려 주시면 이어서 작업하겠습니다.</p>
+  </div>
+</section>
+
+<footer>
+  <p><strong>안뜰</strong> 제품 설계서 v0.1 · 2026-09-02 작성 · 검토용 초안</p>
+  <p>서비스 이름 &lsquo;안뜰&rsquo;은 제안이며 확정이 아닙니다. 대안으로 &lsquo;손길&rsquo;(물건이 손에서 손으로), &lsquo;교정&rsquo;(校庭, 학교 마당)을 함께 검토했습니다. 안뜰을 권하는 이유는 담장 안쪽의 아늑한 마당이라는 뜻이 폐쇄형 캠퍼스 서비스의 성격과 맞고, 발음이 짧으며, 도메인과 앱 이름 확보가 비교적 쉽기 때문입니다.</p>
+  <p>이 문서의 학교 규모·안전거래존·학사 일정은 공개적으로 알려진 교육대학교의 일반적 특성에 기반한 <em>가정</em>이며, 실제 수치와 장소는 학생지원팀 확인 후 확정해야 합니다.</p>
+</footer>
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Array.prototype.slice.call(document.querySelectorAll('main section'));
+  if(!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove('on'); });
+        var cur = map[e.target.id];
+        if(cur) cur.classList.add('on');
+      }
+    });
+  }, { rootMargin: '-8% 0px -80% 0px', threshold: 0 });
+  secs.forEach(function(s){ io.observe(s); });
+  if(links[0]) links[0].classList.add('on');
+})();
+</script>
