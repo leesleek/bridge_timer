@@ -63,6 +63,22 @@
   let muted = store.get('jollaman.muted', false);
   const hiScore = () => (ranking[0] ? ranking[0].s : 0);
 
+  // 캐릭터 상점: 판마다 모은 코인이 지갑(bank)에 쌓이고, 스킨을 사서 장착한다
+  const SKINS = [
+    { id: 'basic', name: '오리지널', price: 0, body: '#ffffff', band: '#ff3355', acc: null },
+    { id: 'neon', name: '네온 블루', price: 100, body: '#22f3ff', band: '#ff2bd6', acc: null },
+    { id: 'cool', name: '쿨가이', price: 200, body: '#ffffff', band: '#22f3ff', acc: 'shades' },
+    { id: 'ninja', name: '닌자', price: 350, body: '#9aa0ff', band: '#15151f', acc: 'ninja' },
+    { id: 'hero', name: '슈퍼 히어로', price: 500, body: '#ffffff', band: '#ffe53b', acc: 'cape' },
+    { id: 'wizard', name: '마법사', price: 700, body: '#d9b3ff', band: '#8a2be2', acc: 'wizard' },
+    { id: 'gold', name: '황금 졸라맨', price: 1000, body: '#ffd23f', band: '#ff3355', acc: 'crown' },
+    { id: 'rainbow', name: '무지개 전설', price: 1500, body: 'rainbow', band: '#ffffff', acc: 'trail' },
+  ];
+  let bank = store.get('jollaman.bank', 0);
+  let owned = store.get('jollaman.owned', ['basic']);
+  let skinId = store.get('jollaman.skin', 'basic');
+  const curSkin = () => SKINS.find((k) => k.id === skinId) || SKINS[0];
+
   // ---------------------------------------------------------------------------
   // 사운드 (WebAudio 합성)
   // ---------------------------------------------------------------------------
@@ -171,6 +187,34 @@
         seq([47, 43, 40, null, 38, 36, 35, 31], 0.16, { type: 'triangle', dur: 0.22, vol: 0.16 });
       },
       record() { seq([79, 84, 88, 91, 96, 91, 96], 0.07, { type: 'square', dur: 0.1, vol: 0.08 }); },
+      warning() {
+        for (let i = 0; i < 4; i++) {
+          tone({ type: 'sawtooth', f: 880, dur: 0.18, vol: 0.09, at: i * 0.36 });
+          tone({ type: 'sawtooth', f: 620, dur: 0.18, vol: 0.09, at: i * 0.36 + 0.18 });
+        }
+      },
+      heavy() {
+        tone({ type: 'sine', f: 120, f2: 30, dur: 0.35, vol: 0.5 });
+        noise({ freq: 400, freq2: 80, dur: 0.3, vol: 0.25, filter: 'lowpass' });
+      },
+      spit() { tone({ type: 'square', f: 180, f2: 520, dur: 0.1, vol: 0.1 }); noise({ freq: 1500, dur: 0.06, vol: 0.08 }); },
+      charge() { tone({ type: 'sawtooth', f: 90, f2: 400, dur: 0.5, vol: 0.12 }); noise({ freq: 600, freq2: 3000, dur: 0.5, vol: 0.1, filter: 'bandpass' }); },
+      bossHit() {
+        tone({ type: 'square', f: 320, f2: 50, dur: 0.3, vol: 0.18 });
+        noise({ freq: 1200, freq2: 200, dur: 0.25, vol: 0.2, filter: 'lowpass' });
+        seq([84, 79], 0.06, { type: 'square', dur: 0.08, vol: 0.07, at: 0.05 });
+      },
+      boom() { noise({ freq: 900, freq2: 60, dur: 0.4, vol: 0.22, filter: 'lowpass' }); },
+      bossDie() {
+        tone({ type: 'sawtooth', f: 600, f2: 40, dur: 1.4, vol: 0.14 });
+        seq([72, 76, 79, 84, 88, 91, 96], 0.08, { type: 'square', dur: 0.12, vol: 0.08, at: 1.4 });
+      },
+      move() { tone({ type: 'square', f: 660, dur: 0.04, vol: 0.06 }); },
+      buy() {
+        noise({ freq: 5000, dur: 0.08, vol: 0.1 });
+        seq([84, 88, 91, 96, 100], 0.06, { type: 'square', dur: 0.12, vol: 0.08, at: 0.05 });
+      },
+      error() { tone({ type: 'square', f: 140, dur: 0.12, vol: 0.12 }); tone({ type: 'square', f: 110, dur: 0.2, vol: 0.12, at: 0.14 }); },
     };
 
     // --- BGM: 16스텝 x 4마디 칩튠 루프 (Am - F - C - G) ---
@@ -282,6 +326,7 @@
   const BTN_PAUSE = { x: W - 48, y: 14, w: 34, h: 34 };
   const BTN_MUTE = { x: W - 92, y: 14, w: 34, h: 34 };
   const SLIDE_ZONE = { x: 0, y: 300, w: 240, h: 240 };
+  const BTN_SHOP = { x: 14, y: 14, w: 120, h: 34 };
 
   function jumpDown() {
     Sound.init();
@@ -316,11 +361,85 @@
     newRun(true);
   }
 
+  // --- 캐릭터 상점 ---
+  const shop = { sel: 0, msg: '', msgT: 0, shakeT: 0 };
+  const cardRect = (i) => ({ x: 50 + (i % 4) * 220, y: 96 + Math.floor(i / 4) * 192, w: 200, h: 176 });
+  function openShop() {
+    Sound.init();
+    Sound.stopMusic();
+    if (g.demo === false) newRun(true);
+    state = 'shop'; stateT = 0;
+    shop.sel = Math.max(0, SKINS.findIndex((k) => k.id === skinId));
+    shop.msgT = 0;
+    Sound.play('select');
+  }
+  function closeShop() {
+    state = 'title'; stateT = 0;
+    Sound.play('select');
+  }
+  function shopMsg(m) { shop.msg = m; shop.msgT = 1.8; }
+  function shopMove(dx, dy) {
+    const col = (shop.sel % 4 + dx + 4) % 4;
+    const row = (Math.floor(shop.sel / 4) + dy + 2) % 2;
+    shop.sel = row * 4 + col;
+    Sound.play('move');
+  }
+  function shopAction() {
+    const k = SKINS[shop.sel];
+    if (owned.includes(k.id)) {
+      if (skinId !== k.id) {
+        skinId = k.id;
+        store.set('jollaman.skin', skinId);
+        Sound.play('select');
+        shopMsg(`${k.name} 장착!`);
+      }
+      return;
+    }
+    if (bank < k.price) {
+      Sound.play('error');
+      shop.shakeT = 0.3;
+      shopMsg(`코인이 ${k.price - bank}개 부족해요!`);
+      return;
+    }
+    bank -= k.price;
+    owned.push(k.id);
+    skinId = k.id;
+    store.set('jollaman.bank', bank);
+    store.set('jollaman.owned', owned);
+    store.set('jollaman.skin', skinId);
+    Sound.play('buy');
+    shopMsg(`${k.name} 구매 완료!`);
+    const r = cardRect(shop.sel);
+    burst(g.camX + r.x + r.w / 2, r.y + r.h / 2, '#ffe53b', 30, 400, 5);
+  }
+  function shopTap(p) {
+    if (overlap(p, BTN_SHOP)) { closeShop(); return; }
+    for (let i = 0; i < SKINS.length; i++) {
+      if (!overlap(p, cardRect(i))) continue;
+      if (shop.sel === i) shopAction();
+      else { shop.sel = i; Sound.play('move'); }
+      return;
+    }
+  }
+
   const JUMP_KEYS = ['Space', 'ArrowUp', 'KeyW', 'KeyZ'];
   const SLIDE_KEYS = ['ArrowDown', 'KeyS', 'KeyX'];
   window.addEventListener('keydown', (e) => {
-    if (JUMP_KEYS.includes(e.code) || SLIDE_KEYS.includes(e.code)) e.preventDefault();
+    if (JUMP_KEYS.includes(e.code) || SLIDE_KEYS.includes(e.code) || e.code.startsWith('Arrow')) e.preventDefault();
     if (e.repeat) return;
+    if (state === 'shop') {
+      Sound.init();
+      const c = e.code;
+      if (c === 'ArrowLeft' || c === 'KeyA') shopMove(-1, 0);
+      else if (c === 'ArrowRight' || c === 'KeyD') shopMove(1, 0);
+      else if (c === 'ArrowUp' || c === 'KeyW') shopMove(0, -1);
+      else if (c === 'ArrowDown' || c === 'KeyS') shopMove(0, 1);
+      else if (c === 'Space' || c === 'Enter' || c === 'KeyZ') shopAction();
+      else if (c === 'Escape' || c === 'KeyC' || c === 'Backspace') closeShop();
+      else if (c === 'KeyM') toggleMute();
+      return;
+    }
+    if (e.code === 'KeyC' && (state === 'title' || (state === 'over' && stateT > 0.5))) { openShop(); return; }
     if (JUMP_KEYS.includes(e.code) || e.code === 'Enter') jumpDown();
     else if (SLIDE_KEYS.includes(e.code)) input.slideHeld = true;
     else if (e.code === 'KeyP' || e.code === 'Escape') {
@@ -344,6 +463,8 @@
     Sound.init();
     const p = toGame(e);
     if (overlap(p, BTN_MUTE)) { toggleMute(); return; }
+    if (state === 'shop') { shopTap(p); return; }
+    if (overlap(p, BTN_SHOP) && (state === 'title' || (state === 'over' && stateT > 0.5))) { openShop(); return; }
     if (overlap(p, BTN_PAUSE) && (state === 'play' || state === 'pause')) { togglePause(); return; }
     if (state === 'pause' && p.y > 330 && p.y < 380) { toTitle(); return; }
     if (state === 'play' && isTouch && overlap(p, SLIDE_ZONE)) {
@@ -391,6 +512,7 @@
       grounds: [{ x1: -600, x2: 1500 }], platforms: [], coinList: [], items: [], enemies: [],
       particles: [], popups: [],
       genX: 1500, shake: 0, flash: 0, banner: null, readyT: 0, rankPos: -1, newRecord: false,
+      boss: null, bossShots: [], bossPending: false, bossCount: 0, bossesBeaten: 0, bossScroll: 0,
     };
     // 튜토리얼 구간 코인
     coinRow(700, GROUND_Y - 36, 8);
@@ -437,6 +559,7 @@
   function gapThen(G, L) { const x0 = g.genX + G; g.grounds.push({ x1: x0, x2: x0 + L }); g.genX = x0 + L; return x0; }
 
   function addChunk() {
+    if (g.boss) { extend(400); return; }   // 보스전 중에는 평평한 아레나만
     const d = g.stage;
     const sp = Math.sqrt(g.speed / 330);
     const type = g.demo
@@ -643,7 +766,199 @@
     banner(`STAGE ${st}`, THEMES[(st - 1) % THEMES.length].name, '#22f3ff');
     addScore(1000 * (st - 1));
     Sound.play('stage');
+    stageMusic(st);
+  }
+  function stageMusic(st) {
     Sound.setTempo(Math.min(180, 140 + (st - 1) * 7), [0, 3, 5, -2, 7][(st - 1) % 5]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 보스전 (3스테이지마다). 보스와 탄환은 화면 좌표(sx)로 관리한다.
+  // ---------------------------------------------------------------------------
+  const BOSSES = [
+    { name: '킹 슬라임', color: '#39ff14', dark: '#138a00' },
+    { name: '메가 슬라임', color: '#ff2bd6', dark: '#8a0a70' },
+    { name: '헬 슬라임', color: '#ff6a00', dark: '#8a2a00' },
+  ];
+  const BOSS_ATTACKS = ['spit', 'slam', 'charge'];
+
+  function startBoss() {
+    g.bossPending = false;
+    g.bossCount++;
+    const lv = g.bossCount;
+    const def = BOSSES[(lv - 1) % BOSSES.length];
+    const px = g.camX + PX;
+    // 앞쪽을 평평한 아레나로 정리
+    g.grounds = g.grounds.filter((sg) => sg.x1 <= px);
+    lastGround().x2 = Math.max(lastGround().x2, g.camX + W + 800);
+    g.genX = lastGround().x2;
+    g.platforms = g.platforms.filter((pl) => pl.x + pl.w < px - 40);
+    g.enemies = g.enemies.filter((e) => e.x < px - 60);
+    g.items = g.items.filter((i) => i.x < px);
+    g.coinList = g.coinList.filter((c) => c.x < px + 40);
+    const hp = Math.min(6, 2 + lv);
+    g.boss = { ...def, lv, hp, maxHp: hp, sx: 760, y: -220, vy: 0, w: 100, h: 84,
+      state: 'warn', t: 0, hitT: 0, atk: 0, onGround: false, shots: 0, slams: 0, boomT: 0, dashing: false };
+    g.bossShots = [];
+    banner('WARNING!!', `BOSS · ${def.name}`, '#ff3355');
+    Sound.play('warning');
+    Sound.setTempo(168, -4);
+  }
+
+  function bossSetState(st) {
+    const b = g.boss;
+    b.state = st; b.t = 0; b.shots = 0; b.slams = 0; b.dashing = false;
+  }
+
+  function bossLand() {
+    const b = g.boss;
+    g.shake = Math.max(g.shake, 0.3);
+    dust(g.camX + b.sx - 40, GROUND_Y, 6);
+    dust(g.camX + b.sx + 40, GROUND_Y, 6);
+    Sound.play('heavy');
+    if (b.state === 'slam') {
+      b.t = 0;
+      g.bossShots.push({ kind: 'wave', sx: b.sx - 60, y: GROUND_Y, w: 30, h: 30, vx: -(430 + b.lv * 30), t: 0 });
+      if (b.lv >= 3) g.bossShots.push({ kind: 'wave', sx: b.sx - 60, y: GROUND_Y, w: 30, h: 30, vx: -(300 + b.lv * 20), t: 0 });
+    }
+  }
+
+  function bossHit(byStomp) {
+    const b = g.boss, p = g.p;
+    b.hp--;
+    b.hitT = 0.9;
+    if (byStomp) { p.vy = -880; p.jumps = 1; }
+    addScore(1000);
+    popup(g.camX + b.sx, b.y - b.h - 20, `+${1000 * scoreMult()}`, '#ffe53b', 18);
+    burst(g.camX + b.sx, b.y - b.h, b.color, 18, 360, 6);
+    ring(g.camX + b.sx, b.y - b.h / 2, '#ffffff');
+    g.shake = Math.max(g.shake, 0.35);
+    g.flash = 0.12;
+    Sound.play('bossHit');
+    // 보상 코인
+    for (let i = 0; i < 5; i++) g.coinList.push({ x: g.camX + PX + 140 + i * 36, y: GROUND_Y - 70 - i * 12, t: 0 });
+    if (b.hp <= 0) {
+      bossSetState('dying');
+      g.bossShots = [];
+      Sound.play('bossDie');
+    }
+  }
+
+  function bossDefeated() {
+    const b = g.boss;
+    const bonus = 5000 * b.lv;
+    addScore(bonus);
+    g.bossesBeaten++;
+    banner('BOSS CLEAR!', `보너스 +${bonus * scoreMult()}`, '#39ff14');
+    burst(g.camX + b.sx, b.y - 40, '#ffe53b', 40, 500, 6);
+    g.flash = 0.35;
+    // 코인 비 + 하트
+    for (let i = 0; i < 24; i++) {
+      g.coinList.push({ x: g.camX + PX + 160 + i * 32, y: GROUND_Y - 40 - Math.abs(Math.sin(i * 0.45)) * 130, t: rand(0, 6) });
+    }
+    addItem(g.camX + PX + 520, GROUND_Y - 180, 'heart');
+    g.boss = null;
+    g.bossShots = [];
+    Sound.play('stage');
+    stageMusic(g.stage);
+  }
+
+  function updateBoss(dt, pb, invincible) {
+    const b = g.boss, p = g.p;
+    b.t += dt;
+    b.hitT = Math.max(0, b.hitT - dt);
+    const lv = b.lv;
+
+    if (b.state !== 'warn' && !b.onGround) {
+      b.vy += GRAV * dt;
+      b.y += b.vy * dt;
+      if (b.y >= GROUND_Y) { b.y = GROUND_Y; b.vy = 0; b.onGround = true; bossLand(); }
+    }
+
+    switch (b.state) {
+      case 'warn':
+        if (b.t > 2.2) bossSetState('enter');
+        break;
+      case 'enter':
+        if (b.onGround && b.t > 0.6) bossSetState('idle');
+        break;
+      case 'idle':
+        if (b.t > Math.max(0.45, 1.1 - lv * 0.15)) {
+          bossSetState(BOSS_ATTACKS[b.atk % BOSS_ATTACKS.length]);
+          b.atk++;
+        }
+        break;
+      case 'spit': {
+        const n = 2 + Math.min(lv, 3);
+        const gap = Math.max(0.42, 0.75 - lv * 0.08);
+        if (b.shots < n && b.t > 0.4 + b.shots * gap) {
+          const high = chance(0.5);
+          g.bossShots.push({ kind: high ? 'high' : 'ball', sx: b.sx - 50, y: high ? GROUND_Y - 44 : GROUND_Y,
+            baseY: GROUND_Y - 44, w: 24, h: high ? 22 : 24, vx: -(360 + lv * 40), t: 0 });
+          b.shots++;
+          Sound.play('spit');
+        }
+        if (b.shots >= n && b.t > 0.4 + n * gap + 0.3) bossSetState('idle');
+        break;
+      }
+      case 'slam': {
+        const maxSlams = lv >= 2 ? 2 : 1;
+        if (b.onGround && b.slams < maxSlams && b.t > 0.35) {
+          b.vy = -950; b.onGround = false; b.slams++; b.t = 0;
+          Sound.play('jump');
+        }
+        if (b.slams >= maxSlams && b.onGround && b.t > 0.7) bossSetState('idle');
+        break;
+      }
+      case 'charge':
+        if (b.t > 0.9) {
+          if (!b.dashing) { b.dashing = true; Sound.play('charge'); }
+          b.sx -= (430 + lv * 50) * dt;
+          if (b.sx < -140) {
+            bossSetState('enter');
+            b.sx = 760; b.y = -220; b.vy = 0; b.onGround = false;
+          }
+        }
+        break;
+      case 'dying':
+        b.boomT -= dt;
+        if (b.boomT <= 0) {
+          b.boomT = 0.12;
+          burst(g.camX + b.sx + rand(-50, 50), b.y - rand(10, 80), chance(0.5) ? '#ffe53b' : b.color, 10, 300, 5);
+          Sound.play('boom');
+          g.shake = Math.max(g.shake, 0.2);
+        }
+        if (b.t > 1.8) { bossDefeated(); return; }
+        break;
+    }
+
+    // 플레이어와 충돌 (화면 좌표로 변환)
+    const pbs = { x: pb.x - g.camX, y: pb.y, w: pb.w, h: pb.h };
+    if (b.state !== 'warn' && b.state !== 'dying') {
+      const bb = { x: b.sx - b.w / 2 + 8, y: b.y - b.h, w: b.w - 16, h: b.h };
+      if (overlap(pbs, bb)) {
+        if (p.vy > 0 && p.prevY <= bb.y + 18 && b.hitT <= 0) bossHit(true);
+        else if (invincible && b.hitT <= 0) bossHit(false);
+        else if (b.hitT <= 0 && !invincible && p.invT <= 0) { hurt(); if (state !== 'play') return; }
+      }
+    }
+
+    for (const sh of g.bossShots) {
+      sh.t += dt;
+      sh.sx += sh.vx * dt;
+      if (sh.kind === 'high') sh.y = sh.baseY + Math.sin(sh.t * 8) * 3;
+      const sb = { x: sh.sx - sh.w / 2, y: sh.y - sh.h, w: sh.w, h: sh.h };
+      if (!overlap(pbs, sb)) continue;
+      if (invincible) {
+        sh.dead = true;
+        burst(g.camX + sh.sx, sh.y - 12, '#ffffff', 8, 200, 4);
+      } else if (p.invT <= 0) {
+        sh.dead = true;
+        hurt();
+        if (state !== 'play') return;
+      }
+    }
+    g.bossShots = g.bossShots.filter((sh) => !sh.dead && sh.sx > -60);
   }
 
   // ---------------------------------------------------------------------------
@@ -708,6 +1023,8 @@
     store.set(RANK_KEY, ranking);
     g.rankPos = ranking.indexOf(entry);
     g.newRecord = g.score > prevHi && g.score > 0;
+    bank += g.coins;
+    store.set('jollaman.bank', bank);
     Sound.play(g.newRecord ? 'record' : 'gameOver');
   }
 
@@ -732,15 +1049,22 @@
     const target = base * (g.feverT > 0 ? 1.3 : 1);
     g.speed += (target - g.speed) * Math.min(1, dt * 2);
     g.camX += g.speed * dt;
+    if (g.boss) g.bossScroll += g.speed * dt;   // 보스전 동안은 거리(스테이지 진행)를 멈춘다
 
-    const nd = Math.floor(g.camX / 10);
+    const nd = Math.floor((g.camX - g.bossScroll) / 10);
     if (nd > g.dist) {
       if (!g.demo) g.score += (nd - g.dist) * scoreMult();
       g.dist = nd;
     }
-    if (!g.demo) {
+    if (!g.demo && !g.boss) {
       const st = 1 + Math.floor(g.dist / STAGE_LEN);
-      if (st > g.stage) stageUp(st);
+      if (st > g.stage) {
+        stageUp(st);
+        if (st % 3 === 0) g.bossPending = true;
+      }
+      // 스테이지 배너가 끝나고 땅 위에 있을 때 보스 등장
+      if (g.bossPending && !g.banner && p.onGround && p.y === GROUND_Y &&
+        g.grounds.some((sg) => px >= sg.x1 + 20 && px <= sg.x2 - 120)) startBoss();
     }
 
     // --- 타이머 ---
@@ -828,7 +1152,7 @@
     // --- 달리기 애니메이션 ---
     p.phase += dt * g.speed * 0.036;
     p.trailT -= dt;
-    if (invincible && p.trailT <= 0) {
+    if ((invincible || curSkin().acc === 'trail') && p.trailT <= 0) {
       p.trailT = 0.035;
       p.trail.push({ x: px, y: p.y, phase: p.phase, sliding: p.sliding, onGround: p.onGround, vy: p.vy, life: 0.25 });
     }
@@ -893,6 +1217,11 @@
       }
     }
 
+    if (g.boss) {
+      updateBoss(dt, pb, invincible);
+      if (state !== 'play') return;
+    }
+
     generate();
     cleanup();
   }
@@ -935,9 +1264,11 @@
     stateT += dt;
     if (theme.mix < 1) theme.mix = Math.min(1, theme.mix + dt / 1.5);
 
-    if (state === 'title') {
+    shop.msgT = Math.max(0, shop.msgT - dt);
+    shop.shakeT = Math.max(0, shop.shakeT - dt);
+    if (state === 'title' || state === 'shop') {
       update(dt);
-      if (stateT > 7) { stateT = 0; setTheme(theme.to + 1); }
+      if (state === 'title' && stateT > 7) { stateT = 0; setTheme(theme.to + 1); }
       updateEffects(dt);
     } else if (state === 'play') {
       if (g.readyT > 0) {
@@ -1280,7 +1611,7 @@
   }
 
   // 졸라맨: 발 위치(x, y) 기준으로 그림
-  function drawJolla(x, y, st, color, alpha = 1) {
+  function drawJolla(x, y, st, color, alpha = 1, skin = null) {
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x, y);
@@ -1343,6 +1674,20 @@
       }
     }
 
+    const acc = skin && skin.acc;
+    if (acc === 'cape') {
+      const wv1 = Math.sin(time * 16) * 5, wv2 = Math.sin(time * 16 + 1.5) * 6;
+      ctx.fillStyle = '#ff3355';
+      ctx.beginPath();
+      ctx.moveTo(neck[0] + 2, neck[1] + 1);
+      ctx.lineTo(neck[0] - 6, neck[1] - 1);
+      ctx.quadraticCurveTo(hip[0] - 22, hip[1] - 6 + wv1, hip[0] - 30, hip[1] + 6 + wv2);
+      ctx.lineTo(hip[0] - 12, hip[1] + 8 + wv1 * 0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = color;
+    }
+
     ctx.beginPath();
     ctx.moveTo(hip[0], hip[1]);
     ctx.lineTo(neck[0], neck[1]);
@@ -1352,8 +1697,17 @@
     ctx.arc(head[0], head[1], 10.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // 빨간 머리띠 (졸라맨의 상징!)
-    ctx.strokeStyle = '#ff3355';
+    const [hx, hy] = head;
+    if (acc === 'ninja') {
+      ctx.fillStyle = '#15151f';
+      ctx.beginPath(); ctx.arc(hx, hy, 10.5, 0.05 * Math.PI, 0.95 * Math.PI); ctx.fill();
+      ctx.fillRect(hx - 10.5, hy - 1, 21, 3);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(hx + 2, hy - 5, 6, 2.5);
+    }
+
+    // 머리띠 (졸라맨의 상징!)
+    ctx.strokeStyle = skin ? skin.band : '#ff3355';
     ctx.lineWidth = 3.5;
     ctx.beginPath();
     ctx.moveTo(head[0] - 10, head[1] - 3);
@@ -1361,12 +1715,39 @@
     ctx.stroke();
     ctx.lineWidth = 3;
     const wv = Math.sin(time * 22);
+    const tl = acc === 'ninja' ? 1.6 : 1;
     ctx.beginPath();
     ctx.moveTo(head[0] - 9, head[1] - 3);
-    ctx.quadraticCurveTo(head[0] - 18, head[1] - 6 + wv * 3, head[0] - 26, head[1] - 2 + wv * 5);
+    ctx.quadraticCurveTo(head[0] - 18 * tl, head[1] - 6 + wv * 3, head[0] - 26 * tl, head[1] - 2 + wv * 5 * tl);
     ctx.moveTo(head[0] - 9, head[1] - 2);
-    ctx.quadraticCurveTo(head[0] - 16, head[1] + 1 - wv * 2, head[0] - 23, head[1] + 5 - wv * 4);
+    ctx.quadraticCurveTo(head[0] - 16 * tl, head[1] + 1 - wv * 2, head[0] - 23 * tl, head[1] + 5 - wv * 4 * tl);
     ctx.stroke();
+
+    if (acc === 'shades') {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(hx + 1, hy - 6, 11, 6);
+      ctx.fillRect(hx - 9, hy - 5, 11, 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillRect(hx + 3, hy - 5, 3, 2);
+    } else if (acc === 'crown') {
+      ctx.fillStyle = '#ffd23f';
+      ctx.strokeStyle = '#b37400';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(hx - 9, hy - 8); ctx.lineTo(hx - 10, hy - 20); ctx.lineTo(hx - 4, hy - 14);
+      ctx.lineTo(hx, hy - 23); ctx.lineTo(hx + 4, hy - 14); ctx.lineTo(hx + 10, hy - 20); ctx.lineTo(hx + 9, hy - 8);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ff3355'; ctx.fillRect(hx - 1.5, hy - 13, 3, 3);
+    } else if (acc === 'wizard') {
+      ctx.fillStyle = '#6a1bbf';
+      ctx.beginPath();
+      ctx.moveTo(hx - 14, hy - 7); ctx.lineTo(hx + 13, hy - 7);
+      ctx.quadraticCurveTo(hx - 2, hy - 16, hx - 14, hy - 38 + Math.sin(time * 6) * 2);
+      ctx.closePath(); ctx.fill();
+      ctx.fillRect(hx - 15, hy - 9, 30, 4);
+      ctx.fillStyle = '#ffe53b';
+      starPath(hx - 1, hy - 17, 4, 1.8, 0); ctx.fill();
+    }
     ctx.restore();
   }
 
@@ -1378,11 +1759,12 @@
         rainbow(tr.life * 900), tr.life * 1.6);
     }
     if (p.invT > 0 && !invincible && Math.floor(time * 14) % 2 === 0 && state === 'play') return;
-    const color = invincible ? rainbow() : '#ffffff';
+    const sk = curSkin();
+    const color = invincible || sk.body === 'rainbow' ? rainbow() : sk.body;
     ctx.shadowColor = invincible ? color : C.edge;
     ctx.shadowBlur = 14;
     const idle = state === 'play' && g.readyT > 0;
-    drawJolla(PX, p.y, { phase: p.phase, sliding: p.sliding, onGround: p.onGround || idle, vy: p.vy, spin: p.spin, idle, dead: p.dead }, color);
+    drawJolla(PX, p.y, { phase: p.phase, sliding: p.sliding, onGround: p.onGround || idle, vy: p.vy, spin: p.spin, idle, dead: p.dead }, color, 1, sk);
     ctx.shadowBlur = 0;
     if (g.magnet > 0 && !invincible) {
       ctx.strokeStyle = 'rgba(255,85,119,0.5)';
@@ -1493,6 +1875,23 @@
     drawCoin(rx - 104, 62, time);
     txt(`x${String(g.coins).padStart(3, '0')}`, rx + 10, 55, 14, '#ffe53b', 'right');
 
+    // 보스 체력바
+    const b = g.boss;
+    if (b && b.state !== 'warn') {
+      const bw = 320, bx = W / 2 - bw / 2, by = 172;
+      outlineTxt(`BOSS · ${b.name}`, W / 2, by - 24, 17, b.color, '#000', KR, 'center', 4);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(bx - 3, by - 3, bw + 6, 18);
+      const seg = bw / b.maxHp;
+      for (let i = 0; i < b.maxHp; i++) {
+        ctx.fillStyle = i < b.hp ? (b.hitT > 0 && i === b.hp ? '#fff' : '#ff3355') : 'rgba(255,255,255,0.12)';
+        ctx.fillRect(bx + i * seg + 1, by, seg - 2, 12);
+      }
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(bx - 3, by - 3, bw + 6, 18);
+    }
+
     // 콤보
     if (g.combo >= 5) {
       const s = 1 + Math.max(0, g.comboT - 1.1) * 1.5;
@@ -1601,7 +2000,7 @@
       ['슬라이드', '↓ 꾹 (공중에선 급강하)'],
       ['공격', '적을 위에서 밟아 처치!'],
       ['피버', '게이지 가득 → 무적 질주'],
-      ['기타', 'P 일시정지 · M 소리'],
+      ['기타', 'C 상점 · P 정지 · M 소리'],
     ];
     lines.forEach(([k, v], i) => {
       txt(k, 288, 276 + i * 28, 15, '#ffe53b', 'left', KR);
@@ -1613,6 +2012,7 @@
 
     txt(`CREDIT ${String(credits).padStart(2, '0')}`, W - 20, H - 22, 10, '#aaa', 'right');
     txt('© 2026 JOLLAMAN ARCADE', 20, H - 22, 10, '#aaa');
+    drawShopButton('SHOP');
   }
 
   function drawPause() {
@@ -1621,6 +2021,189 @@
     outlineTxt('PAUSE', W / 2, 190, 40, '#fff', '#ff2bd6', PIX, 'center', 6);
     if (Math.floor(time * 2) % 2 === 0) txt('SPACE / 탭 : 계속하기', W / 2, 270, 20, '#22f3ff', 'center', KR);
     txt('Q / 여기를 탭 : 타이틀로', W / 2, 340, 18, '#aaa', 'center', KR);
+  }
+
+  function drawShopButton(label) {
+    const b = BTN_SHOP;
+    const pulse = 0.5 + 0.5 * Math.sin(time * 5);
+    ctx.fillStyle = 'rgba(20,0,40,0.85)';
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.strokeStyle = `rgba(255,229,59,${0.6 + pulse * 0.4})`;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+    txt(label, b.x + b.w / 2, b.y + 11, 13, '#ffe53b', 'center');
+    if (state !== 'shop') {
+      drawCoin(b.x + b.w + 22, b.y + b.h / 2, time);
+      txt(String(bank), b.x + b.w + 40, b.y + 10, 14, '#ffe53b', 'left', PIX, '#ffb700');
+    }
+  }
+
+  function drawBoss() {
+    const b = g.boss;
+    if (!b) return;
+    for (const sh of g.bossShots) {
+      ctx.save();
+      ctx.translate(sh.sx, sh.y);
+      if (sh.kind === 'wave') {
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 4;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 12;
+        for (let i = 0; i < 3; i++) {
+          ctx.globalAlpha = 1 - i * 0.3;
+          ctx.beginPath();
+          ctx.ellipse(i * 12, 0, 10, 30 - i * 6, 0, Math.PI, 0);
+          ctx.stroke();
+        }
+      } else {
+        const r = 12;
+        ctx.translate(0, -r);
+        ctx.rotate(-sh.t * 12);
+        ctx.fillStyle = b.color;
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = b.dark;
+        ctx.fillRect(-r, -2, r * 2, 4);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath(); ctx.arc(-4, -4, 3.5, 0, Math.PI * 2); ctx.fill();
+        if (sh.kind === 'high') {
+          ctx.rotate(sh.t * 12);
+          ctx.fillStyle = '#fff';
+          const f = Math.sin(sh.t * 30) * 5;
+          ctx.fillRect(6, -10 + f * 0.3, 14, 4);
+        }
+      }
+      ctx.restore();
+    }
+
+    if (b.state === 'warn') return;
+    const x = b.sx + (b.state === 'dying' || (b.state === 'charge' && !b.dashing) ? rand(-4, 4) : 0);
+    ctx.save();
+    ctx.translate(x, b.y);
+    let sx = 1 + Math.sin(time * 5) * 0.04, sy = 1 / sx;
+    if (!b.onGround) { sx = 0.88; sy = 1.14; }
+    if (b.dashing) { sx = 1.15; sy = 0.9; ctx.rotate(-0.08); }
+    if (b.state === 'dying') ctx.globalAlpha = Math.max(0, 1 - b.t / 1.8);
+    const w = b.w / 2 * sx, h = b.h * sy;
+    const flash = b.hitT > 0 && Math.floor(time * 20) % 2 === 0;
+    // 몸통
+    ctx.shadowColor = b.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = flash ? '#ffffff' : b.color;
+    ctx.beginPath();
+    ctx.moveTo(-w, 0);
+    ctx.quadraticCurveTo(-w * 1.05, -h * 1.1, 0, -h);
+    ctx.quadraticCurveTo(w * 1.05, -h * 1.1, w, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    if (!flash) {
+      ctx.fillStyle = b.dark;
+      ctx.beginPath(); ctx.ellipse(0, -2, w * 0.95, 10, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath(); ctx.ellipse(-w * 0.45, -h * 0.72, 10, 6, -0.5, 0, Math.PI * 2); ctx.fill();
+    }
+    // 화난 눈
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-32, -h * 0.62, 20, 18);
+    ctx.fillRect(6, -h * 0.62, 20, 18);
+    ctx.fillStyle = b.state === 'dying' ? '#000' : '#000';
+    if (b.state === 'dying') {
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-30, -h * 0.6); ctx.lineTo(-14, -h * 0.48); ctx.moveTo(-14, -h * 0.6); ctx.lineTo(-30, -h * 0.48);
+      ctx.moveTo(8, -h * 0.6); ctx.lineTo(24, -h * 0.48); ctx.moveTo(24, -h * 0.6); ctx.lineTo(8, -h * 0.48);
+      ctx.stroke();
+    } else {
+      ctx.fillRect(-30, -h * 0.55, 8, 10);
+      ctx.fillRect(8, -h * 0.55, 8, 10);
+    }
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(-36, -h * 0.74); ctx.lineTo(-10, -h * 0.64);
+    ctx.moveTo(30, -h * 0.74); ctx.lineTo(4, -h * 0.64);
+    ctx.stroke();
+    // 입 (공격할 때 크게 벌림)
+    const open = b.state === 'spit' ? 10 + Math.abs(Math.sin(b.t * 10)) * 8 : 6;
+    ctx.fillStyle = '#300';
+    ctx.beginPath(); ctx.ellipse(-8, -h * 0.25, 18, open, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 4; i++) ctx.fillRect(-22 + i * 8, -h * 0.25 - open, 5, 5);
+    // 왕관
+    ctx.fillStyle = '#ffd23f';
+    ctx.strokeStyle = '#b37400';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const cy = -h + 2;
+    ctx.moveTo(-22, cy); ctx.lineTo(-26, cy - 26); ctx.lineTo(-12, cy - 14); ctx.lineTo(0, cy - 32);
+    ctx.lineTo(12, cy - 14); ctx.lineTo(26, cy - 26); ctx.lineTo(22, cy);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ff3355'; ctx.fillRect(-3, cy - 16, 6, 6);
+    ctx.fillStyle = '#22f3ff'; ctx.fillRect(-19, cy - 10, 4, 4); ctx.fillRect(15, cy - 10, 4, 4);
+    ctx.restore();
+
+    // 돌진 예고
+    if (b.state === 'charge' && !b.dashing && Math.floor(time * 10) % 2 === 0) {
+      outlineTxt('!', b.sx, b.y - b.h - 70, 36, '#ff3355', '#fff', PIX, 'center', 4);
+    }
+  }
+
+  function drawShop() {
+    ctx.fillStyle = 'rgba(5,0,15,0.75)';
+    ctx.fillRect(0, 0, W, H);
+    outlineTxt('CHARACTER SHOP', W / 2, 22, 24, '#fff', '#ff2bd6', PIX, 'center', 6);
+    txt('캐릭터 상점', W / 2, 56, 16, '#22f3ff', 'center', KR);
+    drawShopButton('◀ BACK');
+    drawCoin(W - 250, 31, time);
+    txt(String(bank), W - 232, 24, 16, '#ffe53b', 'left', PIX, '#ffb700');
+
+    SKINS.forEach((k, i) => {
+      const r = cardRect(i);
+      const sel = i === shop.sel, own = owned.includes(k.id), eq = k.id === skinId;
+      const ox = sel && shop.shakeT > 0 ? rand(-5, 5) : 0;
+      ctx.save();
+      ctx.translate(ox, 0);
+      ctx.fillStyle = sel ? 'rgba(40,10,70,0.95)' : 'rgba(20,5,40,0.9)';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.lineWidth = sel ? 3 : 2;
+      ctx.strokeStyle = sel ? rainbow() : (eq ? '#39ff14' : 'rgba(255,255,255,0.25)');
+      ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+
+      const cx = r.x + r.w / 2;
+      ctx.save();
+      ctx.translate(cx, r.y + 110);
+      ctx.scale(1.1, 1.1);
+      const col = k.body === 'rainbow' ? rainbow() : k.body;
+      if (sel) { ctx.shadowColor = col; ctx.shadowBlur = 14; }
+      drawJolla(0, 0, { phase: sel ? time * 9 : 0.4 + i, onGround: true, vy: 0, spin: 0, idle: !sel }, col, own ? 1 : 0.4, k);
+      ctx.restore();
+
+      txt(k.name, cx, r.y + 120, 17, own ? '#fff' : '#bbb', 'center', KR);
+      if (eq) txt('장착 중', cx, r.y + 148, 15, '#39ff14', 'center', KR);
+      else if (own) txt(sel ? '▶ 장착하기' : '보유', cx, r.y + 148, 15, '#22f3ff', 'center', KR);
+      else {
+        drawCoin(cx - 34, r.y + 155, time + i);
+        txt(String(k.price), cx - 18, r.y + 149, 13, bank >= k.price ? '#ffe53b' : '#ff5577');
+      }
+      if (!own) {
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillRect(r.x + r.w - 26, r.y + 12, 12, 9);
+        ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(r.x + r.w - 20, r.y + 12, 4, Math.PI, 0); ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    if (shop.msgT > 0) {
+      ctx.globalAlpha = Math.min(1, shop.msgT * 3);
+      outlineTxt(shop.msg, W / 2, 478, 20, '#ffe53b', '#000', KR, 'center', 5);
+      ctx.globalAlpha = 1;
+    } else {
+      const help = isTouch ? '카드를 탭해서 고르고, 한 번 더 탭하면 구매/장착' : '←→↑↓ 고르기 · SPACE 구매/장착 · ESC 돌아가기';
+      txt(help, W / 2, 482, 16, '#aaa', 'center', KR);
+    }
+    txt('코인은 게임이 끝날 때마다 지갑에 쌓여요!', W / 2, 512, 13, '#777', 'center', KR);
   }
 
   function drawGameOver() {
@@ -1644,22 +2227,27 @@
       ['SCORE', String(g.score).padStart(8, '0'), '#fff'],
       ['DISTANCE', `${g.dist}m`, '#22f3ff'],
       ['STAGE', String(g.stage), '#ffe53b'],
+      ['BOSS', `${g.bossesBeaten} 처치`, '#ff3355'],
       ['COINS', String(g.coins), '#ffe53b'],
       ['MAX COMBO', String(g.maxCombo), '#39ff14'],
     ];
     rows.forEach(([k, v, c], i) => {
-      if (stateT < 0.4 + i * 0.18) return;
-      txt(k, 172, 184 + i * 44, 12, '#aaa');
-      txt(v, 458, 180 + i * 44, 18, c, 'right', PIX, c);
+      if (stateT < 0.4 + i * 0.15) return;
+      txt(k, 172, 182 + i * 38, 12, '#aaa');
+      txt(v, 458, 178 + i * 38, 18, c, 'right', k === 'BOSS' ? KR : PIX, c);
     });
+    if (stateT > 1.3) {
+      outlineTxt(`코인 +${g.coins} 적립!  (보유 ${bank})  ·  C : 캐릭터 상점`, W / 2, 418, 17, '#ffe53b', '#000', KR, 'center', 4);
+    }
+    if (stateT > 0.5) drawShopButton('SHOP');
 
     panel(500, 160, 310, 250, '#ffe53b');
     drawRanking(655, 180, g.rankPos);
 
     if (stateT > 1.2 && Math.floor(time * 2) % 2 === 0) {
-      outlineTxt(isTouch ? 'TAP TO RETRY' : 'PRESS SPACE TO RETRY', W / 2, 438, 18, '#fff', '#ff2bd6', PIX, 'center', 5);
+      outlineTxt(isTouch ? 'TAP TO RETRY' : 'PRESS SPACE TO RETRY', W / 2, 452, 18, '#fff', '#ff2bd6', PIX, 'center', 5);
     }
-    txt('ESC : 타이틀로', W / 2, 480, 15, '#aaa', 'center', KR);
+    txt('ESC : 타이틀로', W / 2, 490, 15, '#aaa', 'center', KR);
   }
 
   function render() {
@@ -1677,6 +2265,7 @@
     }
     for (const it of g.items) if (!it.taken) drawItem(it, camX);
     for (const e of g.enemies) drawEnemy(e, camX);
+    drawBoss();
     drawPlayer(camX);
     drawEffects(camX);
 
@@ -1693,8 +2282,15 @@
     }
     ctx.restore();
 
+    if (g.boss && g.boss.state === 'warn') {
+      ctx.fillStyle = `rgba(255,0,60,${0.12 + 0.12 * Math.sin(time * 14)})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
     if (state === 'title') {
       drawTitle();
+    } else if (state === 'shop') {
+      drawShop();
     } else {
       if (state !== 'over') drawHUD();
       if (state === 'play' && g.readyT > 0) {
@@ -1730,4 +2326,15 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  // 개발용: 주소에 ?debug 를 붙이면 콘솔에서 상태를 조작할 수 있다
+  if (/[?&]debug\b/.test(location.search)) {
+    window.__jolla = {
+      get g() { return g; },
+      get state() { return state; },
+      startBoss,
+      setBank(n) { bank = n; store.set('jollaman.bank', bank); },
+      godMode() { g.lives = 99; },
+    };
+  }
 })();
